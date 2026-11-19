@@ -1,4 +1,4 @@
-# World History Map
+# Who Ruled Earth?
 
 An interactive map of the world's political borders from 3400 BCE to 2024 CE. Pick a year, zoom in, click a territory for details, or play the borders changing over any span of time.
 
