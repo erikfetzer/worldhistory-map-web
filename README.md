@@ -19,6 +19,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - **Rise and fall:** the details card graphs each polity's territory over its whole life (click the graph to jump), and **Largest empires** ranks the top 10 by area for the current year, updating live during playback
 - **Compare years:** a draggable divider shows one year on the left and another on the right, over the same view
 - **Share and record:** links keep the year, the view, the selected polity and the compare year (`#y1250x80p09l47p09z2p98sMongol-Empire`); **Record clip** turns the play range into an MP4 or WebM video with the year burned in, ready to download or share
+- **Cities:** about 1,700 historical cities appear and grow with the year (3700 BCE to today); more appear as you zoom in. Period names for well-known renamings (Byzantium → Constantinople → Istanbul, Edo, Leningrad…). Hover for a population estimate; click a city to see who ruled it
 - **Rulers and events:** the details card loads a Wikipedia summary plus capital, rulers and key events from Wikidata, live in the visitor's browser, with the capital and numbered event pins on the map
 - Shareable links (old `#y117` / `#y-500` links still work)
 - Keyboard: Space plays or pauses, ←/→ steps one year, Shift+←/→ jumps to the previous or next change
@@ -33,6 +34,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 | `countries.json` | Natural Earth 1:50m country borders from `world-atlas`, for the "Today's borders" overlay (loaded only when toggled on) |
 | `favicon.svg`, `*.png`, `manifest.webmanifest` | Favicon, app icons and the 1200×630 share card (`og.png`) |
 | `scripts/og-card.html` | Renders `og.png`: serve the repo root, open it, screenshot `#card` (add `?year=` to pick a year) |
+| `cities.json` | Merged historical city populations (built by `scripts/build-cities.py` from `data-src/cities/`) |
 | `scripts/build-data.sh` | Rebuilds `borders.json` and `land.json` from the sources |
 
 ## Run locally
@@ -49,6 +51,8 @@ Bennett, J.S. et al. "Cliopatria – A geospatial database of world-wide politic
 Source: https://github.com/Seshat-Global-History-Databank/cliopatria
 
 Changes made: converted to TopoJSON, coordinates quantized, attributes trimmed to Name, FromYear, ToYear, Area, Type, Wikipedia, Wikidata and MemberOf.
+
+Cities come from **Reba, Reitsma & Seto (2016)**, "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000", *Scientific Data* 3, 160034, https://doi.org/10.1038/sdata.2016.34, licensed CC BY 4.0 (Chandler data: doi:10.6084/m9.figshare.2059494; Modelski data: doi:10.6084/m9.figshare.2059497). Copies of the CSVs are in `data-src/cities/`. Changes made: the three tables are merged by city, Modelski's 2000 figures are used only where Chandler has no figures from 1950 on, single-point spikes of more than 4x are dropped as transcription errors, and the Allentown row is excluded.
 
 The land outline and today's country borders are Natural Earth (public domain) via the `world-atlas` npm package.
 

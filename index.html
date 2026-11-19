@@ -94,6 +94,7 @@ select option { background: #16222d; }
 #playBtn { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; min-width: 84px; }
 .controls input[type="number"] { width: 78px; font-variant-numeric: tabular-nums; }
 .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
+.city-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f3efe6; box-shadow: 0 0 0 1.5px #0a1219; }
 .dash-swatch { display: inline-block; width: 18px; height: 0; border-top: 1.5px dashed rgba(240,236,226,0.8); }
 .check { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; }
 .credit { grid-column: 1 / -1; text-align: center; line-height: 1.6; font-size: 11px; color: var(--muted); }
@@ -435,6 +436,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       <li>Shapes have been simplified for the web and can be off by tens of kilometers, especially along coasts and small islands.</li>
       <li>Blank areas mean no state is recorded in the dataset. People lived there; they may have been organized in ways a map of states doesn't capture.</li>
     </ul>
+    <h3>Cities are estimates</h3>
+    <p>City populations are historians' estimates, often rough and sometimes centuries apart. A city appears only around years with an estimate, so a missing city may simply lack data. Names follow the period for well-known renamings (Constantinople, Edo, Leningrad); otherwise the modern name is used.</p>
     <h3>Not a statement on any dispute</h3>
     <p>Names, dates and territories follow the Cliopatria dataset. Showing them is not an endorsement of any claim, past or present, and nothing here should be used to argue current territorial, legal or political questions.</p>
     <h3>Errors and corrections</h3>
@@ -463,6 +466,11 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
         <span class="src">Scientific Data 12, 247 (2025)</span></li>
       <li><a href="https://seshat-db.com/core/world_map" target="_blank" rel="noopener">Seshat World Map</a>: the dataset's home, with polity pages and a way to report corrections.</li>
       <li><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 license</a></li>
+    </ul>
+    <h3>Cities</h3>
+    <ul>
+      <li><a href="https://doi.org/10.1038/sdata.2016.34" target="_blank" rel="noopener">Reba, Reitsma &amp; Seto, "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000"</a>: the cities and population estimates, digitized from Tertius Chandler and George Modelski. Licensed CC BY 4.0; merged and lightly cleaned for this map.
+        <span class="src">Scientific Data 3, 160034 (2016)</span></li>
     </ul>
     <h3>Base map and code</h3>
     <ul>
@@ -551,9 +559,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       <button type="button" id="recBtn" title="Record the play range as a video">● Record clip</button>
     </div>
     <span class="sep"></span>
+    <label class="check"><input type="checkbox" id="showCities" checked> <span class="city-swatch" aria-hidden="true"></span>Cities</label>
     <label class="check"><input type="checkbox" id="showModern"> <span class="dash-swatch" aria-hidden="true"></span>Today's borders</label>
   </div>
-  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web</div>
+  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · Cities: <a href="https://doi.org/10.1038/sdata.2016.34">Reba et al. 2016</a> (CC BY 4.0)</div>
 </div>
 
 <script>
@@ -726,6 +735,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   let showRel = false;
   let showModern = false, modern = null, modernLoading = null;
   let spot = null, quiz = null, tour = null, pickMode = false, lastClickLL = null, compare = null;
+  let cities = null, showCities = true, cityHits = [];
   const extraResolved = new Map();
 
   function computeVisible() {
@@ -769,6 +779,101 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     }).filter(l => l.name && isFinite(l.c[0])).sort((a, b) => b.area - a.area);
   }
 
+  // ---------- cities (Reba, Reitsma & Seto 2016: Chandler + Modelski) ----------
+  // period names for well-known renamings, keyed by the dataset's city name: [fromYear, toYear, name]
+  const ERA_NAMES = {
+    "Istanbul": [[-9999, 329, "Byzantium"], [330, 1929, "Constantinople"]],
+    "Mexico City": [[-9999, 1520, "Tenochtitlan"]],
+    "Tokyo": [[-9999, 1867, "Edo"]],
+    "Saint Petersburg": [[1914, 1923, "Petrograd"], [1924, 1990, "Leningrad"]],
+    "Volgograd": [[-9999, 1924, "Tsaritsyn"], [1925, 1960, "Stalingrad"]],
+    "Xian": [[-9999, 904, "Chang'an"], [905, 9999, "Xi'an"]],
+    "New York": [[-9999, 1663, "New Amsterdam"]],
+    "Jakarta": [[-9999, 1941, "Batavia"]],
+    "Ho Chi Minh": [[-9999, 1975, "Saigon"], [1976, 9999, "Ho Chi Minh City"]],
+    "Mumbai": [[-9999, 1994, "Bombay"]],
+    "Madras": [[1996, 9999, "Chennai"]],
+    "Oslo": [[1624, 1924, "Christiania"]],
+    "Konigsberg": [[-9999, 1945, "Königsberg"], [1946, 9999, "Kaliningrad"]],
+    "Wroclaw": [[-9999, 1944, "Breslau"], [1945, 9999, "Wrocław"]],
+    "Gdansk": [[-9999, 1944, "Danzig"], [1945, 9999, "Gdańsk"]],
+    "Smyrna": [[1930, 9999, "İzmir"]],
+    "Kinshasa": [[-9999, 1965, "Léopoldville"]],
+    "Harare": [[-9999, 1981, "Salisbury"]],
+    "Yekaterinburg": [[1924, 1990, "Sverdlovsk"]],
+    "Tbilisi": [[-9999, 1935, "Tiflis"]],
+  };
+  function cityName(c, y) {
+    const r = ERA_NAMES[c.n];
+    if (r) for (const [a, b, nm] of r) if (y >= a && y <= b) return nm;
+    return c.n;
+  }
+  // population estimate for a year: log-interpolate between estimates up to 500 years apart;
+  // otherwise only near an estimate (100 years after, 50 before; estimates from 1900 on carry to today)
+  function cityPop(c, y) {
+    const o = c.o;
+    let lo = 0, hi = o.length - 1, i = -1;
+    while (lo <= hi) { const m = (lo + hi) >> 1; if (o[m][0] <= y) { i = m; lo = m + 1; } else hi = m - 1; }
+    const prev = i >= 0 ? o[i] : null, next = i + 1 < o.length ? o[i + 1] : null;
+    if (prev && prev[0] === y) return prev[1];
+    if (prev && next && next[0] - prev[0] <= 500) {
+      const t = (y - prev[0]) / (next[0] - prev[0]);
+      return Math.exp(Math.log(prev[1]) + t * (Math.log(next[1]) - Math.log(prev[1])));
+    }
+    if (prev && y - prev[0] <= (prev[0] >= 1900 ? 9999 : 100)) return prev[1];
+    if (next && next[0] - y <= 50) return next[1];
+    return 0;
+  }
+  const cityCache = new Map();
+  function activeCities(y) {
+    if (cityCache.has(y)) return cityCache.get(y);
+    const l = [];
+    for (const c of cities) { const p = cityPop(c, y); if (p > 0) l.push({ c, p }); }
+    l.sort((a, b) => b.p - a.p);
+    if (cityCache.size > 12) cityCache.delete(cityCache.keys().next().value);
+    cityCache.set(y, l);
+    return l;
+  }
+  const fmtPop = (p) => p >= 1e6 ? (p / 1e6).toFixed(p >= 1e7 ? 0 : 1) + " million" : (Math.round(p / 1000) * 1000).toLocaleString();
+  function drawCities(y, boxes, clip) {
+    if (!showCities || !cities || quiz) return;
+    const k = transform.k, list = activeCities(y);
+    const limit = Math.min(240, Math.round(7 * Math.pow(k, 1.35)));
+    const family = getComputedStyle(document.body).fontFamily;
+    const xmin = clip ? clip[0] : 0, xmax = clip ? clip[0] + clip[2] : W;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.textBaseline = "middle";
+    let shown = 0;
+    const hit = (b) => boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]));
+    for (const { c, p } of list) {
+      if (shown >= limit) break;
+      const pt = projection(c.ll); if (!pt) continue;
+      const sx = pt[0] * k + transform.x, sy = pt[1] * k + transform.y;
+      if (sx < xmin + 2 || sx > xmax - 2 || sy < 0 || sy > H) continue;
+      const r = Math.max(2.3, Math.min(5.5, 1 + 1.25 * Math.log10(p / 4000)));
+      const name = cityName(c, y);
+      const fs = shown < 6 ? 12.5 : 11.5;
+      ctx.font = `500 ${fs}px ${family}`;
+      const w = ctx.measureText(name).width, hh = fs * 0.62;
+      let b = [sx - r - 1, sy - hh, sx + r + 5 + w + 2, sy + hh], align = "left";
+      if (hit(b) || b[2] > xmax) { b = [sx - r - 5 - w - 2, sy - hh, sx + r + 1, sy + hh]; align = "right"; if (hit(b) || b[0] < xmin) continue; }
+      boxes.push(b); shown++;
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fillStyle = "#f3efe6"; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#0a1219"; ctx.stroke();
+      ctx.textAlign = align;
+      const tx = align === "left" ? sx + r + 4 : sx - r - 4;
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.8)"; ctx.strokeText(name, tx, sy);
+      ctx.fillStyle = "rgba(243,239,230,0.95)"; ctx.fillText(name, tx, sy);
+      cityHits.push({ x: sx, y: sy, r, c, p, name });
+    }
+    ctx.textAlign = "center";
+  }
+  function cityAt(x, y) {
+    let best = null, bd = 1e9;
+    for (const h of cityHits) { const d = Math.hypot(h.x - x, h.y - y); if (d <= h.r + 6 && d < bd) { bd = d; best = h; } }
+    return best;
+  }
+
   // ---------- drawing ----------
   let drawQueued = false;
   function draw() {
@@ -776,19 +881,20 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     requestAnimationFrame(() => { drawQueued = false; drawNow(); });
   }
   function drawNow() {
+    cityHits = [];
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = C.void; ctx.fillRect(0, 0, W, H);
     if (compare) {
       const dx = Math.round(compare.x);
-      drawScene(visible, [0, 0, dx, H]);
-      drawScene(compare.visibleB, [dx, 0, W - dx, H]);
+      drawScene(visible, [0, 0, dx, H], year);
+      drawScene(compare.visibleB, [dx, 0, W - dx, H], compare.yearB);
       drawCompareChrome(dx);
     } else {
-      drawScene(visible, null);
+      drawScene(visible, null, year);
     }
     drawPins();
   }
-  function drawScene(list, clip) {
+  function drawScene(list, clip, sceneYear) {
     ctx.save();
     if (clip) { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.beginPath(); ctx.rect(clip[0], clip[1], clip[2], clip[3]); ctx.clip(); }
     const k = transform.k;
@@ -854,6 +960,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.7)"; ctx.strokeText(o.label, sx, sy);
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
     }
+
+    drawCities(sceneYear, boxes, clip);
 
     // today's country names: small italic caps, fitted around the historical labels
     if (showModern && modern && modern.labels && !quiz) {
@@ -1067,6 +1175,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     downAt = null;
     if (moved > 5 || quiz) return;
     const ll = screenToLL(e.clientX, e.clientY);
+    const ch = cityAt(e.clientX, e.clientY);
+    if (ch) { openSpot(ch.c.ll, ch.name); return; }
     if (pickMode) { if (ll) openSpot(ll); return; }
     lastClickLL = ll;
     selected = hitAt(e.clientX, e.clientY);
@@ -1085,6 +1195,18 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     if (hoverQueued) return; hoverQueued = true;
     requestAnimationFrame(() => {
       hoverQueued = false;
+      const ch = cityAt(lastMove.clientX, lastMove.clientY);
+      if (ch) {
+        if (hovered) { hovered = null; draw(); }
+        const today = ch.name !== ch.c.n ? ` (today ${ch.c.n === "Xian" ? "Xi'an" : ch.c.n === "Ho Chi Minh" ? "Ho Chi Minh City" : ch.c.n})` : "";
+        tip.textContent = `${ch.name}${today} · about ${fmtPop(ch.p)} people`;
+        tip.style.display = "block";
+        tip.style.left = Math.min(W - tip.offsetWidth - 8, lastMove.clientX + 14) + "px";
+        tip.style.top = (lastMove.clientY + 14) + "px";
+        canvas.style.cursor = "pointer";
+        return;
+      }
+      if (canvas.style.cursor === "pointer") canvas.style.cursor = pickMode ? "crosshair" : "";
       const h = hitAt(lastMove.clientX, lastMove.clientY);
       if (h !== hovered) { hovered = h; draw(); }
       if (h) {
@@ -1318,10 +1440,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   }
   $("pickSpot").onclick = () => { if (pickMode) setPick(false); else { closeSpot(); setPick(true); } };
 
-  function openSpot(ll) {
+  function openSpot(ll, label) {
     setPick(false);
     if (leadersOpen) setLeaders(false);
-    spot = { ll, bands: null, today: null };
+    spot = { ll, bands: null, today: null, label: label || null };
     if (phone.matches) { selected = null; renderInfo(); }
     if (!phone.matches) {
       const top = Math.round(document.querySelector(".brand").getBoundingClientRect().bottom + 10);
@@ -1329,11 +1451,11 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       $("spot").style.maxHeight = `calc(100% - ${top + 8}px - var(--dockH, 200px))`;
     } else { $("spot").style.top = ""; $("spot").style.maxHeight = ""; }
     $("spot").classList.add("show");
-    $("spotTitle").textContent = fmtLL(ll);
+    $("spotTitle").textContent = label ? `Who ruled ${label}?` : fmtLL(ll);
     $("spotSub").textContent = "Searching 5,400 years of borders…";
     $("spotStrip").innerHTML = ""; $("spotList").innerHTML = "";
     draw();
-    track("who_ruled_here");
+    track("who_ruled_here", label ? { city: label } : {});
     setTimeout(() => {
       if (!spot || spot.ll !== ll) return;
       const r = whoRuled(ll);
@@ -1355,7 +1477,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   function renderSpot() {
     if (!spot || !spot.bands) return;
     const { bands, lanes } = spot, n = bands.length;
-    $("spotSub").textContent = (spot.today ? `Today: ${spot.today}. ` : "") +
+    $("spotSub").textContent = (spot.label ? fmtLL(spot.ll) + ". " : "") + (spot.today ? `Today: ${spot.today}. ` : "") +
       (n ? `${n} ${n === 1 ? "power" : "powers"} held this spot.` : "No state is recorded at this spot in the dataset.");
     const Wd = 1000, laneH = 16, Hh = lanes * laneH + 6;
     const x = (y) => (y - MIN_Y) / (MAX_Y - MIN_Y) * Wd;
@@ -2155,6 +2277,12 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   document.addEventListener("pointerdown", (e) => { if (brandEl.classList.contains("open") && !brandEl.contains(e.target)) setMenu(false); });
   $("searchForm").addEventListener("submit", () => { if (phone.matches) setTimeout(() => setSearchOpen(false), 0); });
   phone.addEventListener?.("change", () => { setMenu(false); setSearchOpen(false); });
+
+  $("showCities").addEventListener("change", (e) => { showCities = e.target.checked; draw(); });
+  fetch("cities.json").then(r => r.json()).then(rows => {
+    cities = rows.map(([n, alt, lon, lat, o]) => ({ n, alt, ll: [lon, lat], o }));
+    draw();
+  }).catch(() => { $("showCities").checked = false; $("showCities").disabled = true; });
 
   // ---------- go ----------
   setRange(-800, 500);
