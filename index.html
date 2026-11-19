@@ -133,6 +133,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 @media (prefers-reduced-motion: reduce) { #crumbNote svg { animation: none; } }
 
 .mobile-only { display: none; }
+.m-only { display: none; }
 
 /* feature buttons in the title box */
 .feature-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
@@ -259,6 +260,20 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
 
 @media (max-width: 760px) {
   .brand p { display: none; }
+  /* slim phone header: title + search + ⋮ menu */
+  .top { left: 8px; right: 8px; top: 8px; gap: 8px; }
+  .brand { width: 100%; max-width: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 6px 6px 14px; }
+  .brand h1 { flex: 1; font-size: 18px; }
+  .brand .m-only { display: inline-grid; place-items: center; width: 40px; height: 40px; min-height: 0; padding: 0; border-radius: 8px; background: none; border: 1px solid transparent; color: var(--ink); }
+  .brand .m-only[aria-expanded="true"] { background: rgba(217,169,91,0.18); border-color: rgba(217,169,91,0.5); color: var(--brass); }
+  .brand .feature-row, .brand .links { display: none; flex-basis: 100%; }
+  .brand.open { padding-bottom: 10px; box-shadow: 0 16px 40px rgba(0,0,0,0.45); }
+  .brand.open .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 4px 8px 0 0; }
+  .brand.open .feature-row .pill { min-height: 44px; border-radius: 8px; font-size: 13px; }
+  .brand.open .feature-row .pill:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .brand.open .links { display: flex; justify-content: center; gap: 20px; margin: 8px 8px 0 0; font-size: 13px; }
+  .top .search { display: none; }
+  body.search-open .top .search { display: flex; }
   #crumbNote { left: 8px; right: 8px; top: auto; bottom: var(--dockH, 380px); width: auto; }
   .dock > * { min-width: 0; }
   .controls .group { flex-wrap: wrap; justify-content: center; }
@@ -300,8 +315,14 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
 <div id="loading">Loading 5,400 years of borders…</div>
 
 <div class="top">
-  <div class="brand">
+  <div class="brand" id="brand">
     <h1>World History Map</h1>
+    <button type="button" class="m-only icon-btn" id="searchToggle" aria-label="Search" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+    <button type="button" class="m-only icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="brand">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="5" r="2.1" fill="currentColor"/><circle cx="12" cy="12" r="2.1" fill="currentColor"/><circle cx="12" cy="19" r="2.1" fill="currentColor"/></svg>
+    </button>
     <p>Political borders from 3400 BCE to 2024 CE. Drag to pan, scroll or pinch to zoom, click a territory for details. Right-click any spot to see everyone who ruled it.</p>
     <div class="feature-row">
       <button type="button" class="pill" data-open="tours">Tours</button>
@@ -680,7 +701,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     const availH = Math.max(200, H - dockH);
     if (W <= 760 && availH > W * 0.7) {
       // tall phone screen: fill the height, centre on Afro-Eurasia, let the sides run off-screen (pan to see them)
-      const top = 150, h = Math.max(160, availH - top - 8);
+      const top = 70, h = Math.max(160, availH - top - 8);
       projection.rotate([-30, 0]).fitSize([h * 1.95, h], { type: "Sphere" });
       const [tx, ty] = projection.translate();
       projection.translate([W / 2, ty + top]);
@@ -2113,6 +2134,27 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     document.querySelectorAll("dialog[open]").forEach(d => d.close());
     crumb.classList.add("show");
   };
+
+  // ---------- phone header: ⋮ menu and search toggle ----------
+  const brandEl = $("brand"), menuBtn = $("menuBtn"), searchToggle = $("searchToggle");
+  function setMenu(open) {
+    brandEl.classList.toggle("open", open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+    if (open) setSearchOpen(false);
+  }
+  function setSearchOpen(open) {
+    document.body.classList.toggle("search-open", open);
+    searchToggle.setAttribute("aria-expanded", String(open));
+    if (open) { setMenu(false); setTimeout(() => $("searchInput").focus(), 0); }
+  }
+  menuBtn.onclick = (e) => { e.stopPropagation(); setMenu(!brandEl.classList.contains("open")); };
+  searchToggle.onclick = (e) => { e.stopPropagation(); setSearchOpen(!document.body.classList.contains("search-open")); };
+  // picking anything in the menu closes it
+  brandEl.addEventListener("click", (e) => { if (e.target.closest(".feature-row button, .links button")) setTimeout(() => setMenu(false), 0); });
+  // tapping elsewhere closes the menu
+  document.addEventListener("pointerdown", (e) => { if (brandEl.classList.contains("open") && !brandEl.contains(e.target)) setMenu(false); });
+  $("searchForm").addEventListener("submit", () => { if (phone.matches) setTimeout(() => setSearchOpen(false), 0); });
+  phone.addEventListener?.("change", () => { setMenu(false); setSearchOpen(false); });
 
   // ---------- go ----------
   setRange(-800, 500);
