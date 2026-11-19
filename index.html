@@ -127,6 +127,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 @keyframes wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(8deg); } }
 @media (prefers-reduced-motion: reduce) { #cookie svg { animation: none; } }
 
+.mobile-only { display: none; }
 #loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--font-display); font-size: 22px; color: var(--muted); background: var(--void); }
 
 @media (max-width: 760px) {
@@ -136,6 +137,15 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   .controls .group { flex-wrap: wrap; justify-content: center; }
   .controls { gap: 8px 10px; }
   .ticks span:nth-child(2), .ticks span:nth-child(4) { display: none; }
+  .yearbox { align-items: center; }
+  .mobile-only { display: flex; gap: 8px; margin-left: auto; }
+  #miniPlay { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; min-width: 44px; min-height: 40px; }
+  #dockToggle { min-height: 40px; white-space: nowrap; }
+  .dock.collapsed .controls, .dock.collapsed .credit { display: none; }
+  .dock.collapsed #countLabel { display: none; }
+  .dock:not(.collapsed) #miniPlay { display: none; }
+  .dock.collapsed .track { height: 40px; }
+  .dock.collapsed #spark { height: 20px; }
   .top { flex-direction: column; }
   .search input { width: 100%; }
   .search { width: 100%; }
@@ -252,6 +262,10 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   <div class="yearbox">
     <div id="yearLabel">—</div>
     <div id="countLabel"></div>
+    <div class="mobile-only">
+      <button type="button" id="miniPlay" aria-label="Play">▶</button>
+      <button type="button" id="dockToggle" aria-expanded="false" aria-controls="dockMore">More ▴</button>
+    </div>
   </div>
   <div>
     <div class="track">
@@ -260,7 +274,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     </div>
     <div class="ticks"><span>3400 BCE</span><span>2000 BCE</span><span>1000 BCE</span><span>1 CE</span><span>1000 CE</span><span>2024 CE</span></div>
   </div>
-  <div class="controls">
+  <div class="controls" id="dockMore">
     <div class="group">
       <button id="prevChange" title="Previous border change (Shift+←)" aria-label="Previous border change">⇤</button>
       <button id="prevYear" title="Back one year (←)" aria-label="Back one year">−1</button>
@@ -413,7 +427,16 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     const dockH = document.querySelector(".dock").offsetHeight + 24;
     document.documentElement.style.setProperty("--dockH", (dockH - 8) + "px");
-    projection.fitExtent([[12, 12], [W - 12, Math.max(200, H - dockH)]], { type: "Sphere" });
+    const availH = Math.max(200, H - dockH);
+    if (W <= 760 && availH > W * 0.7) {
+      // tall phone screen: fill the height, centre on Afro-Eurasia, let the sides run off-screen (pan to see them)
+      const top = 150, h = Math.max(160, availH - top - 8);
+      projection.rotate([-30, 0]).fitSize([h * 1.95, h], { type: "Sphere" });
+      const [tx, ty] = projection.translate();
+      projection.translate([W / 2, ty + top]);
+    } else {
+      projection.rotate([0, 0]).fitExtent([[12, 12], [W - 12, availH]], { type: "Sphere" });
+    }
     spherePath = new Path2D(); d3.geoPath(projection, spherePath)({ type: "Sphere" });
     landPath = new Path2D(); d3.geoPath(projection, landPath)(land);
     gratPath = new Path2D(); d3.geoPath(projection, gratPath)(graticule);
@@ -586,12 +609,12 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     if (playing) return;
     if (year >= rangeTo || year < rangeFrom) setYear(rangeFrom, 1);
     playing = true; last = performance.now(); acc = 0;
-    playBtn.textContent = "❚❚ Pause";
+    playBtn.textContent = "❚❚ Pause"; $("miniPlay").textContent = "❚❚"; $("miniPlay").setAttribute("aria-label", "Pause");
     requestAnimationFrame(tick);
   }
   function pause() {
     if (!playing) return;
-    playing = false; playBtn.textContent = "▶ Play"; writeHash();
+    playing = false; playBtn.textContent = "▶ Play"; $("miniPlay").textContent = "▶"; $("miniPlay").setAttribute("aria-label", "Play"); writeHash();
   }
   function tick(ts) {
     if (!playing) return;
@@ -614,6 +637,20 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     requestAnimationFrame(tick);
   }
   playBtn.onclick = () => playing ? pause() : play();
+  $("miniPlay").onclick = () => playing ? pause() : play();
+
+  // ---------- collapsible dock on phones ----------
+  const dock = document.querySelector(".dock"), dockToggle = $("dockToggle");
+  const phone = window.matchMedia("(max-width: 760px)");
+  function setCollapsed(c) {
+    dock.classList.toggle("collapsed", c);
+    dockToggle.setAttribute("aria-expanded", String(!c));
+    dockToggle.textContent = c ? "More ▴" : "Less ▾";
+    resize(); computeVisible();
+  }
+  dockToggle.onclick = () => setCollapsed(!dock.classList.contains("collapsed"));
+  if (phone.matches) dock.classList.add("collapsed");
+  phone.addEventListener?.("change", (e) => setCollapsed(e.matches));
 
   // ---------- zoom & interaction ----------
   const zoom = d3.zoom().scaleExtent([1, 40])
