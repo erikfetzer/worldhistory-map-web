@@ -22,6 +22,8 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 | `index.html` | The whole app (D3 + canvas rendering, loaded from cdnjs/jsDelivr) |
 | `borders.json` | Cliopatria borders as TopoJSON (~16 MB, ~3.7 MB gzipped) |
 | `land.json` | Natural Earth 1:50m land outline from `world-atlas` |
+| `favicon.svg`, `*.png`, `manifest.webmanifest` | Favicon, app icons and the 1200×630 share card (`og.png`) |
+| `scripts/og-card.html` | Renders `og.png`: serve the repo root, open it, screenshot `#card` (add `?year=` to pick a year) |
 | `scripts/build-data.sh` | Rebuilds `borders.json` and `land.json` from the sources |
 
 ## Run locally

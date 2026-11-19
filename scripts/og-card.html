@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Share card renderer</title>
+<!-- Renders og.png (1200x630). Serve the repo root, open /scripts/og-card.html, screenshot the #card element. -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --void: #0a1219; --sea: #101c27; --land: #2a3138; --ink: #e9e4d8; --muted: #a9b2b7; --brass: #d9a95b; }
+html, body { margin: 0; background: #000; }
+#card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: var(--void); font-family: "IBM Plex Sans", system-ui, sans-serif; color: var(--ink); }
+canvas { position: absolute; inset: 0; }
+.fade { position: absolute; inset: 0; background: linear-gradient(90deg, var(--void) 0%, rgba(10,18,25,0.94) 30%, rgba(10,18,25,0.35) 55%, rgba(10,18,25,0) 72%); }
+.text { position: absolute; left: 72px; top: 0; bottom: 0; width: 560px; display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+.eyebrow { font-size: 18px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brass); }
+h1 { margin: 0; font-family: "Fraunces", Georgia, serif; font-weight: 650; font-size: 96px; line-height: 0.98; letter-spacing: -0.02em; }
+p { margin: 0; font-size: 27px; line-height: 1.35; color: var(--muted); max-width: 500px; }
+.timeline { margin-top: 18px; width: 470px; }
+.bar { position: relative; height: 6px; border-radius: 3px; background: rgba(233,228,216,0.18); }
+.fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--brass); }
+.thumb { position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 0 5px rgba(217,169,91,0.25); }
+.ends { display: flex; justify-content: space-between; margin-top: 12px; font-size: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.year { position: absolute; right: 56px; bottom: 44px; text-align: right; }
+.year b { font-family: "Fraunces", Georgia, serif; font-weight: 650; font-size: 64px; line-height: 1; }
+.year small { font-size: 22px; font-weight: 500; color: var(--brass); margin-left: 8px; letter-spacing: 0.06em; }
+.domain { font-size: 26px; font-weight: 500; color: var(--brass); letter-spacing: 0.01em; }
+</style>
+</head>
+<body>
+<div id="card">
+  <canvas id="c" width="2400" height="1260" style="width:1200px;height:630px"></canvas>
+  <div class="fade"></div>
+  <div class="text">
+    <div class="eyebrow">3400 BCE → today</div>
+    <h1>Who ruled Earth?</h1>
+    <p>Pick any year, press play, and watch 5,400 years of borders rise and fall.</p>
+    <div class="timeline">
+      <div class="bar"><div class="fill" id="fill"></div><div class="thumb" id="thumb"></div></div>
+      <div class="ends"><span>3400 BCE</span><span>2024 CE</span></div>
+    </div>
+    <div class="domain">whoruled.earth</div>
+  </div>
+  <div class="year"><b id="yr"></b><small id="era"></small></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script>
+(async () => {
+  const YEAR = +(new URLSearchParams(location.search).get("year") || 1250);
+  const [b, l] = await Promise.all([fetch("../borders.json").then(r => r.json()), fetch("../land.json").then(r => r.json())]);
+  const fc = topojson.feature(b, b.objects[Object.keys(b.objects)[0]]);
+  const land = topojson.feature(l, l.objects.land);
+  function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  const colorFor = (n) => { const h = hash(n); return `hsl(${h % 360} ${38 + (h >> 9) % 22}% ${48 + (h >> 17) % 16}%)`; };
+  const feats = fc.features.filter(f => f.geometry && f.properties.Type !== "RELATION" && f.properties.FromYear <= YEAR && YEAR <= f.properties.ToYear);
+  for (const f of feats) if (d3.geoArea(f) > 2 * Math.PI) { const g = f.geometry; const rev = p => p.map(r => r.slice().reverse()); g.coordinates = g.type === "Polygon" ? rev(g.coordinates) : g.coordinates.map(rev); }
+  const ctx = document.getElementById("c").getContext("2d");
+  ctx.scale(2, 2);
+  const proj = d3.geoNaturalEarth1().rotate([-45, 0]).scale(255).translate([800, 345]);
+  const path = d3.geoPath(proj, ctx);
+  ctx.fillStyle = "#101c27"; ctx.beginPath(); path({ type: "Sphere" }); ctx.fill();
+  ctx.strokeStyle = "rgba(233,228,216,0.05)"; ctx.lineWidth = 0.6; ctx.beginPath(); path(d3.geoGraticule10()); ctx.stroke();
+  ctx.fillStyle = "#2a3138"; ctx.beginPath(); path(land); ctx.fill();
+  feats.sort((a, b) => d3.geoArea(b) - d3.geoArea(a));
+  for (const f of feats) {
+    ctx.beginPath(); path(f);
+    ctx.globalAlpha = 0.9; ctx.fillStyle = colorFor(f.properties.Name); ctx.fill();
+    ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(10,18,25,0.85)"; ctx.lineWidth = 0.8; ctx.stroke();
+  }
+  const pct = (YEAR + 3400) / (2024 + 3400) * 100;
+  document.getElementById("fill").style.width = pct + "%";
+  document.getElementById("thumb").style.left = pct + "%";
+  document.getElementById("yr").textContent = Math.abs(YEAR);
+  document.getElementById("era").textContent = YEAR < 0 ? "BCE" : "CE";
+  await document.fonts.ready;
+  document.body.dataset.ready = "1";
+})();
+</script>
+</body>
+</html>
