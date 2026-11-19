@@ -114,7 +114,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 .modal .foot { margin-top: 18px; display: flex; justify-content: flex-end; }
 .modal .foot button { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
 
-#crumbNote { position: fixed; right: 16px; top: 80px; width: 330px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; backdrop-filter: blur(8px); display: none; gap: 14px; grid-template-columns: 56px 1fr; box-shadow: 0 16px 40px rgba(0,0,0,0.4); z-index: 5; }
+#crumbNote { position: fixed; right: 16px; top: 80px; width: 392px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; backdrop-filter: blur(8px); display: none; gap: 14px; grid-template-columns: 56px 1fr; box-shadow: 0 16px 40px rgba(0,0,0,0.4); z-index: 5; }
 #crumbNote.show { display: grid; }
 #crumbNote svg { width: 56px; height: 56px; animation: wobble 3.2s ease-in-out infinite; }
 #crumbNote h2 { font-family: var(--font-display); font-weight: 650; font-size: 17px; margin: 0 0 4px; text-wrap: balance; }
@@ -123,6 +123,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #crumbNote .note-x { position: absolute; top: 6px; right: 6px; border: none; background: none; color: var(--muted); font-size: 20px; line-height: 1; min-height: 0; padding: 4px 8px; }
 #crumbNote .note-x:hover { color: var(--ink); }
 #crumbNote h2 { padding-right: 22px; }
+#crumbNote .row { align-items: center; }
 #crumbNote .note-ok { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
 @keyframes wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(8deg); } }
 @media (prefers-reduced-motion: reduce) { #crumbNote svg { animation: none; } }
@@ -194,10 +195,11 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   </svg>
   <div>
     <h2>Cookies? Not since 3400 BCE.</h2>
-    <p>The Sumerians baked flatbread, and we bake nothing. This site sets no cookies and tracks nobody. Your browser only remembers that you closed this note.</p>
+    <p>The Sumerians baked flatbread. We'd like just one cookie: Google Analytics, to count visits and see which centuries people explore. No ads, nothing sold.</p>
   </div>
   <div class="row">
     <button type="button" class="linkbtn" data-open="disclaimer">Read the fine print</button>
+    <button type="button" class="note-no" id="crumbNo">No thanks</button>
     <button type="button" class="note-ok" id="crumbOk">Accept all empires</button>
   </div>
 </aside>
@@ -220,7 +222,8 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     <h3>Errors and corrections</h3>
     <p>Spot a mistake? Corrections to the underlying data go to the Seshat Global History Databank, which reviews them with historians. See <button type="button" class="linkbtn" data-open="resources">Resources</button> for links.</p>
     <h3>Privacy</h3>
-    <p>This site sets no cookies and runs no ads or trackers. It stores one small flag in your browser so the cookie note stays closed. Clicking a Wikipedia or Wikidata link takes you to those sites, which have their own policies.</p>
+    <p>If you click "Accept all empires", the site loads Google Analytics, which sets cookies to count visits and see how the map is used. If you choose "No thanks" or close the note, Google Analytics never loads. Either way, your browser stores one small flag so the note stays closed. There are no ads, and nothing is sold. Clicking a Wikipedia or Wikidata link takes you to those sites, which have their own policies.</p>
+    <p><button type="button" class="linkbtn" id="resetConsent">Change my cookie choice</button></p>
     <h3>No warranty</h3>
     <p>Provided as is, for curiosity and learning. For research, check the original sources.</p>
     <div class="foot"><button type="button" data-close>Got it</button></div>
@@ -319,6 +322,40 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · <button type="button" class="linkbtn" data-open="resources">Resources</button> · <button type="button" class="linkbtn" data-open="disclaimer">Disclaimer</button></div>
 </div>
 
+<script>
+// Google Analytics loads only after the visitor clicks "Accept all empires".
+(function () {
+  const KEY = "wre-consent", GA_ID = "G-204488VP91";
+  let loaded = false;
+  function load() {
+    if (loaded) return; loaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+    gtag("js", new Date());
+    gtag("config", GA_ID);
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    document.head.appendChild(s);
+  }
+  window.wreConsent = {
+    get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
+    set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} if (v === "yes") { window["ga-disable-" + GA_ID] = false; load(); } },
+    clear() {
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      if (loaded) {
+        // stop collection now; remove GA cookies so a fresh choice starts clean
+        window["ga-disable-" + GA_ID] = true;
+        document.cookie.split(";").map(c => c.trim().split("=")[0]).filter(n => n === "_ga" || n.startsWith("_ga_"))
+          .forEach(n => { const host = location.hostname.split(".").slice(-2).join(".");
+            document.cookie = n + "=; Max-Age=0; path=/";
+            document.cookie = n + "=; Max-Age=0; path=/; domain=." + host; });
+      }
+    }
+  };
+  if (window.wreConsent.get() === "yes") load();
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
@@ -777,15 +814,16 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     if (e.target.tagName === "DIALOG") e.target.close(); // click on the backdrop
   });
   const crumb = $("crumbNote");
-  let seen = false;
-  try { seen = localStorage.getItem("wre-cookie-ok") === "1"; } catch (e) {}
-  if (!seen) setTimeout(() => crumb.classList.add("show"), 1200);
-  const closeCrumb = () => {
-    crumb.classList.remove("show");
-    try { localStorage.setItem("wre-cookie-ok", "1"); } catch (e) {}
+  if (!window.wreConsent.get()) setTimeout(() => crumb.classList.add("show"), 1200);
+  const decide = (v) => { crumb.classList.remove("show"); window.wreConsent.set(v); };
+  $("crumbOk").onclick = () => decide("yes");
+  $("crumbNo").onclick = () => decide("no");
+  $("crumbX").onclick = () => decide("no");
+  $("resetConsent").onclick = () => {
+    window.wreConsent.clear();
+    document.querySelectorAll("dialog[open]").forEach(d => d.close());
+    crumb.classList.add("show");
   };
-  $("crumbOk").onclick = closeCrumb;
-  $("crumbX").onclick = closeCrumb;
 
   // ---------- go ----------
   setRange(-800, 500);
