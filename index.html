@@ -95,10 +95,40 @@ select option { background: #16222d; }
 .credit { margin-left: auto; font-size: 11px; color: var(--muted); }
 .credit a { color: var(--muted); }
 
+.brand .links { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; }
+.linkbtn { background: none; border: none; padding: 0; min-height: 0; color: var(--brass); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: inherit; }
+.linkbtn:hover { color: var(--ink); }
+
+dialog.modal { width: min(620px, calc(100% - 32px)); max-height: min(80vh, 760px); padding: 0; border: 1px solid var(--line); border-top: 3px solid var(--brass); border-radius: 12px; background: #111b25; color: var(--ink); box-shadow: 0 30px 80px rgba(0,0,0,0.55); }
+dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3px); }
+.modal-inner { padding: 22px 26px 24px; overflow-y: auto; max-height: inherit; }
+.modal h2 { font-family: var(--font-display); font-weight: 650; font-size: 26px; margin: 0 36px 4px 0; text-wrap: balance; }
+.modal .kicker { color: var(--brass); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
+.modal h3 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; font-weight: 600; }
+.modal p, .modal li { line-height: 1.55; max-width: 62ch; }
+.modal p { margin: 8px 0; }
+.modal ul { margin: 6px 0; padding-left: 18px; display: grid; gap: 8px; }
+.modal a { color: var(--brass); }
+.modal .src { color: var(--muted); font-size: 13px; display: block; }
+.modal .close-x { position: absolute; top: 12px; right: 12px; border: none; background: none; color: var(--muted); font-size: 22px; min-height: 0; padding: 4px 10px; }
+.modal .foot { margin-top: 18px; display: flex; justify-content: flex-end; }
+.modal .foot button { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
+
+#cookie { position: fixed; right: 16px; top: 80px; width: 330px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; backdrop-filter: blur(8px); display: none; gap: 14px; grid-template-columns: 56px 1fr; box-shadow: 0 16px 40px rgba(0,0,0,0.4); z-index: 5; }
+#cookie.show { display: grid; }
+#cookie svg { width: 56px; height: 56px; animation: wobble 3.2s ease-in-out infinite; }
+#cookie h2 { font-family: var(--font-display); font-weight: 650; font-size: 17px; margin: 0 0 4px; text-wrap: balance; }
+#cookie p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+#cookie .row { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+#cookie .accept { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
+@keyframes wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(8deg); } }
+@media (prefers-reduced-motion: reduce) { #cookie svg { animation: none; } }
+
 #loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--font-display); font-size: 22px; color: var(--muted); background: var(--void); }
 
 @media (max-width: 760px) {
   .brand p, .credit { display: none; }
+  #cookie { left: 8px; right: 8px; top: auto; bottom: 236px; width: auto; }
   .top { flex-direction: column; }
   .search input { width: 100%; }
   .search { width: 100%; }
@@ -119,6 +149,10 @@ select option { background: #16222d; }
   <div class="brand">
     <h1>World History Map</h1>
     <p>Political borders from 3400 BCE to 2024 CE. Drag to pan, scroll or pinch to zoom, click a territory for details.</p>
+    <div class="links">
+      <button type="button" class="linkbtn" data-open="resources">Resources &amp; sources</button>
+      <button type="button" class="linkbtn" data-open="disclaimer">Disclaimer</button>
+    </div>
   </div>
   <form class="search" id="searchForm">
     <input type="search" id="searchInput" list="names" placeholder="Find a polity, e.g. Roman Empire" aria-label="Find a polity">
@@ -134,6 +168,77 @@ select option { background: #16222d; }
   <div class="links" id="infoLinks"></div>
 </div>
 <div id="tip"></div>
+
+<aside id="cookie" role="region" aria-label="Cookie notice">
+  <svg viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4a28 28 0 1 0 27.6 23.2 7 7 0 0 1-8.4-6.8 7 7 0 0 1-8.8-8.7A7 7 0 0 1 35.6 4.2 28.6 28.6 0 0 0 32 4Z" fill="#c98f4a" stroke="#0a1219" stroke-width="2"/>
+    <circle cx="22" cy="24" r="3.6" fill="#3b2414"/><circle cx="36" cy="34" r="3" fill="#3b2414"/><circle cx="20" cy="42" r="3.4" fill="#3b2414"/><circle cx="44" cy="46" r="2.8" fill="#3b2414"/><circle cx="31" cy="50" r="2.2" fill="#3b2414"/>
+  </svg>
+  <div>
+    <h2>Cookies? Not since 3400 BCE.</h2>
+    <p>The Sumerians baked flatbread, and we bake nothing. This site sets no cookies and tracks nobody. Your browser only remembers that you closed this note.</p>
+  </div>
+  <div class="row">
+    <button type="button" class="linkbtn" data-open="disclaimer">Read the fine print</button>
+    <button type="button" class="accept" id="cookieOk">Accept all empires</button>
+  </div>
+</aside>
+
+<dialog class="modal" id="dlg-disclaimer" aria-labelledby="disclaimerTitle">
+  <div class="modal-inner">
+    <button type="button" class="close-x" data-close aria-label="Close">×</button>
+    <div class="kicker">The fine print</div>
+    <h2 id="disclaimerTitle">Disclaimer</h2>
+    <p>Who Ruled Earth is an educational visualization. It shows one scholarly reading of the past, drawn as clean lines on a map. The real past was messier.</p>
+    <h3>Borders are approximate</h3>
+    <ul>
+      <li>For most of history, borders were frontiers and zones of influence rather than surveyed lines. Sharp edges here are a simplification.</li>
+      <li>The data is sampled at varying time steps, so borders jump between snapshots rather than changing smoothly year by year. A shape can be decades out of date at any given year.</li>
+      <li>Shapes have been simplified for the web and can be off by tens of kilometers, especially along coasts and small islands.</li>
+      <li>Blank areas mean no state is recorded in the dataset. People lived there; they may have been organized in ways a map of states doesn't capture.</li>
+    </ul>
+    <h3>Not a statement on any dispute</h3>
+    <p>Names, dates and territories follow the Cliopatria dataset. Showing them is not an endorsement of any claim, past or present, and nothing here should be used to argue current territorial, legal or political questions.</p>
+    <h3>Errors and corrections</h3>
+    <p>Spot a mistake? Corrections to the underlying data go to the Seshat Global History Databank, which reviews them with historians. See <button type="button" class="linkbtn" data-open="resources">Resources</button> for links.</p>
+    <h3>Privacy</h3>
+    <p>This site sets no cookies and runs no ads or trackers. It stores one small flag in your browser so the cookie note stays closed. Clicking a Wikipedia or Wikidata link takes you to those sites, which have their own policies.</p>
+    <h3>No warranty</h3>
+    <p>Provided as is, for curiosity and learning. For research, check the original sources.</p>
+    <div class="foot"><button type="button" data-close>Got it</button></div>
+  </div>
+</dialog>
+
+<dialog class="modal" id="dlg-resources" aria-labelledby="resourcesTitle">
+  <div class="modal-inner">
+    <button type="button" class="close-x" data-close aria-label="Close">×</button>
+    <div class="kicker">Where this comes from</div>
+    <h2 id="resourcesTitle">Resources &amp; sources</h2>
+    <h3>Border data</h3>
+    <ul>
+      <li><a href="https://github.com/Seshat-Global-History-Databank/cliopatria" target="_blank" rel="noopener">Cliopatria</a>: the political borders on this map, covering 1,600+ polities from 3400 BCE to 2024 CE. Licensed CC BY 4.0; converted to TopoJSON and trimmed for the web.
+        <span class="src">Seshat Global History Databank</span></li>
+      <li><a href="https://doi.org/10.1038/s41597-025-04516-9" target="_blank" rel="noopener">Bennett et al., "Cliopatria – A geospatial database of world-wide political entities from 3400BCE to 2024CE"</a>
+        <span class="src">Scientific Data 12, 247 (2025)</span></li>
+      <li><a href="https://seshat-db.com/core/world_map" target="_blank" rel="noopener">Seshat World Map</a>: the dataset's home, with polity pages and a way to report corrections.</li>
+      <li><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 license</a></li>
+    </ul>
+    <h3>Base map and code</h3>
+    <ul>
+      <li><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>: the land outline (public domain), via the <a href="https://github.com/topojson/world-atlas" target="_blank" rel="noopener">world-atlas</a> package.</li>
+      <li><a href="https://d3js.org/" target="_blank" rel="noopener">D3</a> and <a href="https://github.com/topojson/topojson-client" target="_blank" rel="noopener">TopoJSON</a>: projection and drawing.</li>
+      <li>Each territory links to its <a href="https://www.wikipedia.org/" target="_blank" rel="noopener">Wikipedia</a> article and <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> entry. Click any shape on the map.</li>
+    </ul>
+    <h3>Explore further</h3>
+    <ul>
+      <li><a href="https://www.openhistoricalmap.org/" target="_blank" rel="noopener">OpenHistoricalMap</a>: a community-edited historical map with its own time slider and very fine local detail in places.</li>
+      <li><a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener">historical-basemaps</a>: world boundary snapshots for selected years, including cultural regions.</li>
+      <li><a href="https://www.davidrumsey.com/" target="_blank" rel="noopener">David Rumsey Map Collection</a>: tens of thousands of scanned historical maps.</li>
+      <li><a href="https://awmc.unc.edu/" target="_blank" rel="noopener">Ancient World Mapping Center</a> (UNC): maps and data for the ancient Mediterranean world.</li>
+    </ul>
+    <div class="foot"><button type="button" data-close>Close</button></div>
+  </div>
+</dialog>
 
 <div class="dock">
   <div class="yearbox">
@@ -188,7 +293,7 @@ select option { background: #16222d; }
     </div>
     <span class="sep"></span>
     <label class="check"><input type="checkbox" id="showRel"> Alliances &amp; overlords</label>
-    <span class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web</span>
+    <span class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · <button type="button" class="linkbtn" data-open="resources">Resources</button> · <button type="button" class="linkbtn" data-open="disclaimer">Disclaimer</button></span>
   </div>
 </div>
 
@@ -601,6 +706,7 @@ select option { background: #16222d; }
   $("showRel").addEventListener("change", (e) => { showRel = e.target.checked; computeVisible(); draw(); });
 
   window.addEventListener("keydown", (e) => {
+    if (document.querySelector("dialog[open]")) return;
     if (e.target.matches("input, select, textarea")) return;
     if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
     else if (e.key === "ArrowRight") { e.preventDefault(); pause(); setYear(e.shiftKey ? nextChange(1) : year + 1, 1); writeHash(); }
@@ -611,6 +717,27 @@ select option { background: #16222d; }
   function writeHash() { try { history.replaceState(null, "", "#y" + year); } catch (e) {} }
   function readHash() { const m = /^#y(-?\d+)$/.exec(location.hash); return m ? +m[1] : null; }
   window.addEventListener("hashchange", () => { const y = readHash(); if (y !== null) setYear(y, 1); });
+
+  // ---------- modals & cookie note ----------
+  document.addEventListener("click", (e) => {
+    const opener = e.target.closest("[data-open]");
+    if (opener) {
+      const d = document.getElementById("dlg-" + opener.dataset.open);
+      document.querySelectorAll("dialog[open]").forEach(x => { if (x !== d) x.close(); });
+      if (d && !d.open) { pause(); d.showModal(); }
+      return;
+    }
+    if (e.target.closest("[data-close]")) { e.target.closest("dialog").close(); return; }
+    if (e.target.tagName === "DIALOG") e.target.close(); // click on the backdrop
+  });
+  const cookie = $("cookie");
+  let seen = false;
+  try { seen = localStorage.getItem("wre-cookie-ok") === "1"; } catch (e) {}
+  if (!seen) setTimeout(() => cookie.classList.add("show"), 1200);
+  $("cookieOk").onclick = () => {
+    cookie.classList.remove("show");
+    try { localStorage.setItem("wre-cookie-ok", "1"); } catch (e) {}
+  };
 
   // ---------- go ----------
   setRange(-800, 500);
