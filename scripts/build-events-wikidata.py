@@ -23,12 +23,13 @@ CLASSES = {
 KEEP = 2600
 
 QUERY = """
-SELECT ?e ?eLabel ?pit ?start ?coord ?pcoord ?sl ?article WHERE {
+SELECT ?e ?eLabel ?pit ?pitp ?start ?startp ?end ?endp ?coord ?pcoord ?sl ?article WHERE {
   ?e wdt:P31 wd:%(cls)s ; wikibase:sitelinks ?sl .
   FILTER(?sl >= %(min)d)
-  OPTIONAL { ?e wdt:P585 ?pit }
-  OPTIONAL { ?e wdt:P580 ?start }
-  FILTER(BOUND(?pit) || BOUND(?start))
+  OPTIONAL { ?e p:P585/psv:P585 [ wikibase:timeValue ?pit ; wikibase:timePrecision ?pitp ] }
+  OPTIONAL { ?e p:P580/psv:P580 [ wikibase:timeValue ?start ; wikibase:timePrecision ?startp ] }
+  OPTIONAL { ?e p:P582/psv:P582 [ wikibase:timeValue ?end ; wikibase:timePrecision ?endp ] }
+  FILTER(BOUND(?pit) || BOUND(?start) || BOUND(?end))
   OPTIONAL { ?e wdt:P625 ?coord }
   OPTIONAL { ?e wdt:P276|wdt:P1071 ?place . ?place wdt:P625 ?pcoord }
   OPTIONAL { ?article schema:about ?e ; schema:isPartOf <https://en.wikipedia.org/> }
@@ -78,11 +79,24 @@ for cat, classes in CLASSES.items():
             ll = point(b.get("coord", {}).get("value", "")) or point(b.get("pcoord", {}).get("value", ""))
             if not ll:
                 continue
-            # prefer the event's "point in time"; fall back to its start date
-            when, kind = (b["pit"]["value"], 0) if "pit" in b else (b["start"]["value"], 1)
-            try:
-                y = year_of(when)
-            except Exception:
+            # Dates: use the "point in time" if known to the year; otherwise the start date, unless the
+            # event lasted over 10 years (a long process, not a moment); otherwise the end date.
+            # Precision 9 = year or finer; 8 = decade, 7 = century (too vague to place on a timeline).
+            def get(k):
+                if k not in b or int(b.get(k + "p", {}).get("value", "0")) < 9:
+                    return None
+                try:
+                    return year_of(b[k]["value"])
+                except Exception:
+                    return None
+            pit, start, end = get("pit"), get("start"), get("end")
+            if pit is not None:
+                y, kind = pit, 0
+            elif start is not None and (end is None or end - start <= 10):
+                y, kind = start, 1
+            elif start is None and end is not None and "start" in b:
+                y, kind = end, 2
+            else:
                 continue
             if y < -3400 or y > 2025:
                 continue
@@ -92,7 +106,7 @@ for cat, classes in CLASSES.items():
             cur = events.get(qid)
             row = [y, ll[0], ll[1], cat, label, wiki, sl, qid]
             # keep a point-in-time date over a start date; among equals keep the earliest
-            if cur is None or (kind, y) < (cur_kind.get(qid, 1), cur[0]):
+            if cur is None or (kind, y) < (cur_kind.get(qid, 9), cur[0]):
                 events[qid] = row
                 cur_kind[qid] = kind
         time.sleep(2)
