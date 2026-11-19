@@ -20,6 +20,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - **Compare years:** a draggable divider shows one year on the left and another on the right, over the same view
 - **Share and record:** links keep the year, the view, the selected polity and the compare year (`#y1250x80p09l47p09z2p98sMongol-Empire`); **Record clip** turns the play range into an MP4 or WebM video with the year burned in, ready to download or share
 - **Cities:** about 1,700 historical cities appear and grow with the year (3700 BCE to today); more appear as you zoom in. Period names for well-known renamings (Byzantium → Constantinople → Istanbul, Edo, Leningrad…). Hover for a population estimate; click a city to see who ruled it
+- **Events:** about 230 hand-picked headline events plus ~1,800 famous battles, treaties, revolutions, expeditions and disasters from Wikidata. Pins (a shape and colour per type) fade in and out around their year, more appear as you zoom, a ticker names events as playback passes them, and each opens a card with the story. Filter by type
 - **Rulers and events:** the details card loads a Wikipedia summary plus capital, rulers and key events from Wikidata, live in the visitor's browser, with the capital and numbered event pins on the map
 - Shareable links (old `#y117` / `#y-500` links still work)
 - Keyboard: Space plays or pauses, ←/→ steps one year, Shift+←/→ jumps to the previous or next change
@@ -34,6 +35,8 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 | `countries.json` | Natural Earth 1:50m country borders from `world-atlas`, for the "Today's borders" overlay (loaded only when toggled on) |
 | `favicon.svg`, `*.png`, `manifest.webmanifest` | Favicon, app icons and the 1200×630 share card (`og.png`) |
 | `scripts/og-card.html` | Renders `og.png`: serve the repo root, open it, screenshot `#card` (add `?year=` to pick a year) |
+| `events.json` | Hand-picked headline events (written in `data-src/events-curated.py`) |
+| `events-wikidata.json` | Famous events from Wikidata, refreshed monthly by `.github/workflows/events.yml` running `scripts/build-events-wikidata.py` |
 | `cities.json` | Merged historical city populations (built by `scripts/build-cities.py` from `data-src/cities/`) |
 | `scripts/build-data.sh` | Rebuilds `borders.json` and `land.json` from the sources |
 

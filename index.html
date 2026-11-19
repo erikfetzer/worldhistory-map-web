@@ -216,6 +216,26 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #clipPanel .row .muted { margin-right: auto; font-size: 12px; }
 #clipPanel a.primary { text-decoration: none; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--brass); }
 
+/* events */
+.ev-types { display: flex; gap: 4px; flex-wrap: wrap; }
+.ev-type { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 8px; min-height: 28px; border-radius: 999px; background: rgba(255,255,255,0.05); }
+.ev-type[aria-pressed="false"] { opacity: 0.45; }
+.ev-type svg { width: 11px; height: 11px; display: block; }
+#evCard { right: 16px; top: 80px; width: 340px; padding: 14px 16px; display: none; max-height: calc(100% - 88px - var(--dockH, 200px)); overflow-y: auto; }
+#evCard.show { display: block; }
+#evCard h2 { font-size: 20px; margin-right: 24px; }
+#evCard .ev-when { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
+#evCard p { line-height: 1.5; margin: 8px 0; }
+#evCard .src { color: var(--muted); font-size: 11px; }
+#evCard .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+#ticker { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--dockH, 200px) + 8px); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; z-index: 3; width: min(560px, calc(100% - 32px)); }
+#ticker button { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; max-width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; min-height: 0; font-size: 13px; backdrop-filter: blur(6px); box-shadow: 0 8px 24px rgba(0,0,0,0.35); animation: tickIn 0.35s ease-out; transition: opacity 0.6s; }
+#ticker button b { font-variant-numeric: tabular-nums; color: var(--brass); font-weight: 600; }
+#ticker button span.t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ticker button.out { opacity: 0; }
+@keyframes tickIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+body.quiz-mode #ticker, body.quiz-mode #evCard { display: none !important; }
+
 /* daily quiz */
 body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode #spot, body.quiz-mode #tourCard, body.quiz-mode #tip, body.quiz-mode #crumbNote { display: none !important; }
 #quiz { left: 50%; transform: translateX(-50%); bottom: 16px; width: min(640px, calc(100% - 32px)); padding: 16px 18px; display: none; max-height: calc(100% - 32px); overflow-y: auto; }
@@ -299,6 +319,9 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   #info { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 40vh; overflow-y: auto; }
   #spot { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 45vh; }
   #leaders { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 45vh; }
+  #evCard { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 45vh; }
+  #ticker { bottom: calc(var(--dockH, 200px) + 4px); }
+  #ticker button { font-size: 12px; padding: 5px 12px; }
   .cmp-row { gap: 8px; }
   .cmp-row .cmp-tag { display: none; }
   .cmp-row b { min-width: 74px; font-size: 16px; }
@@ -364,6 +387,21 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   <div class="strip-ticks"><span>3400 BCE</span><span>1 CE</span><span>2024 CE</span></div>
   <ol id="spotList"></ol>
 </section>
+
+<section id="evCard" class="panel" aria-live="polite" aria-label="Event details">
+  <button type="button" class="x" id="evClose" aria-label="Close">×</button>
+  <div class="kicker" id="evKicker"></div>
+  <h2 id="evTitle"></h2>
+  <div class="ev-when" id="evWhen"></div>
+  <p id="evText"></p>
+  <div class="src" id="evSrc"></div>
+  <div class="row">
+    <button type="button" class="primary" id="evJump">Go to this year</button>
+    <button type="button" id="evSpot">Who ruled here?</button>
+  </div>
+  <div class="links" id="evLinks" style="margin-top:10px;font-size:13px"></div>
+</section>
+<div id="ticker" aria-live="polite"></div>
 
 <section id="leaders" class="panel" aria-label="Largest empires right now">
   <button type="button" class="x" id="leadersClose" aria-label="Close">×</button>
@@ -438,6 +476,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     </ul>
     <h3>Cities are estimates</h3>
     <p>City populations are historians' estimates, often rough and sometimes centuries apart. A city appears only around years with an estimate, so a missing city may simply lack data. Names follow the period for well-known renamings (Constantinople, Edo, Leningrad); otherwise the modern name is used.</p>
+    <h3>Events</h3>
+    <p>About 230 headline events were chosen and written for this site. Thousands more come from Wikidata, picked by how many language editions of Wikipedia cover them. That favours well-documented events, so some regions and eras are better covered than others. Locations are where an event happened or where a treaty was signed; ancient dates are often approximate.</p>
     <h3>Not a statement on any dispute</h3>
     <p>Names, dates and territories follow the Cliopatria dataset. Showing them is not an endorsement of any claim, past or present, and nothing here should be used to argue current territorial, legal or political questions.</p>
     <h3>Errors and corrections</h3>
@@ -471,6 +511,11 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     <ul>
       <li><a href="https://doi.org/10.1038/sdata.2016.34" target="_blank" rel="noopener">Reba, Reitsma &amp; Seto, "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000"</a>: the cities and population estimates, digitized from Tertius Chandler and George Modelski. Licensed CC BY 4.0; merged and lightly cleaned for this map.
         <span class="src">Scientific Data 3, 160034 (2016)</span></li>
+    </ul>
+    <h3>Events</h3>
+    <ul>
+      <li>About 230 headline events, hand-picked and written for this site, each linked to its Wikipedia article.</li>
+      <li><a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>: famous battles, sieges, treaties, revolutions, expeditions and disasters with a date and a place, ranked by how many Wikipedia language editions cover them. Refreshed monthly.</li>
     </ul>
     <h3>Base map and code</h3>
     <ul>
@@ -559,10 +604,12 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       <button type="button" id="recBtn" title="Record the play range as a video">● Record clip</button>
     </div>
     <span class="sep"></span>
+    <label class="check"><input type="checkbox" id="showEvents" checked> Events</label>
+    <div class="ev-types" id="evTypes" aria-label="Event types"></div>
     <label class="check"><input type="checkbox" id="showCities" checked> <span class="city-swatch" aria-hidden="true"></span>Cities</label>
     <label class="check"><input type="checkbox" id="showModern"> <span class="dash-swatch" aria-hidden="true"></span>Today's borders</label>
   </div>
-  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · Cities: <a href="https://doi.org/10.1038/sdata.2016.34">Reba et al. 2016</a> (CC BY 4.0)</div>
+  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · Events: hand-picked + <a href="https://www.wikidata.org/">Wikidata</a> · Cities: <a href="https://doi.org/10.1038/sdata.2016.34">Reba et al. 2016</a> (CC BY 4.0)</div>
 </div>
 
 <script>
@@ -736,6 +783,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   let showModern = false, modern = null, modernLoading = null;
   let spot = null, quiz = null, tour = null, pickMode = false, lastClickLL = null, compare = null;
   let cities = null, showCities = true, cityHits = [];
+  let events = null, showEvents = true, eventHits = [], openEvent = null;
+  const evCats = { war: true, politics: true, exploration: true, culture: true, disaster: true };
   const extraResolved = new Map();
 
   function computeVisible() {
@@ -874,6 +923,109 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     return best;
   }
 
+  // ---------- events: hand-picked headlines + famous events from Wikidata ----------
+  const EV = {
+    war: { label: "Wars & battles", color: "#e0675b" },
+    politics: { label: "Politics", color: "#8fb8d8" },
+    exploration: { label: "Exploration", color: "#5fc2b0" },
+    culture: { label: "Science & culture", color: "#c9a0e8" },
+    disaster: { label: "Disasters", color: "#f0a35a" },
+  };
+  // each type has its own shape so it reads without colour
+  function evShape(c, cat, x, y, s) {
+    c.beginPath();
+    if (cat === "war") { c.moveTo(x, y - s); c.lineTo(x + s, y); c.lineTo(x, y + s); c.lineTo(x - s, y); c.closePath(); }
+    else if (cat === "politics") { const a = s * 0.82; c.rect(x - a, y - a, 2 * a, 2 * a); }
+    else if (cat === "exploration") { c.moveTo(x, y - s * 1.05); c.lineTo(x + s, y + s * 0.8); c.lineTo(x - s, y + s * 0.8); c.closePath(); }
+    else if (cat === "disaster") { for (let j = 0; j < 12; j++) { const r = j % 2 ? s * 0.5 : s * 1.1, a = -Math.PI / 2 + j * Math.PI / 6; c.lineTo(x + r * Math.cos(a), y + r * Math.sin(a)); } c.closePath(); }
+    else { c.arc(x, y, s * 0.9, 0, Math.PI * 2); }
+  }
+  function evShapeSVG(cat) {
+    const col = EV[cat].color;
+    const p = { war: "M6 1 11 6 6 11 1 6Z", politics: "M1.5 1.5h9v9h-9Z", exploration: "M6 1 11 10.5H1Z", disaster: "M6 0.5 7.2 4 11 3.5 8.6 6.4 10.6 9.8 6.9 8.7 6 12 5.1 8.7 1.4 9.8 3.4 6.4 1 3.5 4.8 4Z" }[cat];
+    return `<svg viewBox="0 0 12 12" aria-hidden="true">${p ? `<path d="${p}" fill="${col}" stroke="#0a1219" stroke-width="1"/>` : `<circle cx="6" cy="6" r="5" fill="${col}" stroke="#0a1219" stroke-width="1"/>`}</svg>`;
+  }
+  // how many years either side of its date an event stays on the map
+  const evWindow = (y) => y < -1000 ? 60 : y < 0 ? 30 : y < 1000 ? 20 : y < 1800 ? 10 : y < 1900 ? 6 : 4;
+  const normT = (t) => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+  function buildEvents(cur, wd) {
+    const list = cur.map(([y, approx, lon, lat, cat, t, d, w]) => ({ y, approx: !!approx, ll: [lon, lat], cat, t, d, w, imp: 1000, cur: true }));
+    const seenWiki = new Set(list.map(e => normT(e.w)));
+    const seenKey = new Set(list.map(e => normT(e.t) + "|" + e.y));
+    for (const [y, lon, lat, cat, t, w, sl, qid] of wd) {
+      if (!EV[cat]) continue;
+      if (w && seenWiki.has(normT(w))) continue;
+      const k = normT(t) + "|" + y;
+      if (seenKey.has(k)) continue;
+      seenKey.add(k); if (w) seenWiki.add(normT(w));
+      list.push({ y, approx: false, ll: [lon, lat], cat, t, d: null, w, imp: sl, cur: false, qid });
+    }
+    list.sort((a, b) => a.y - b.y);
+    return list;
+  }
+  function eventsNear(y) {
+    if (!events) return [];
+    const out = [];
+    // events sorted by year: scan the window around y
+    let lo = 0, hi = events.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (events[m].y < y - 60) lo = m + 1; else hi = m; }
+    for (let i = lo; i < events.length && events[i].y <= y + 60; i++) {
+      const e = events[i], d = Math.abs(e.y - y), w = evWindow(e.y);
+      if (d > w || !evCats[e.cat]) continue;
+      out.push({ e, d, w, score: e.imp * (1 - 0.5 * d / w) });
+    }
+    out.sort((a, b) => b.score - a.score);
+    return out;
+  }
+  function drawEvents(y, boxes, clip) {
+    if (!showEvents || !events || quiz) return;
+    const k = transform.k, list = eventsNear(y);
+    const limit = Math.min(50, Math.round(3.5 * Math.pow(k, 1.15)));
+    const family = getComputedStyle(document.body).fontFamily;
+    const xmin = clip ? clip[0] : 0, xmax = clip ? clip[0] + clip[2] : W;
+    const hit = (b) => boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.textBaseline = "middle";
+    let shown = 0;
+    for (const { e, d, w } of list) {
+      if (shown >= limit) break;
+      const pt = projection(e.ll); if (!pt) continue;
+      const sx = pt[0] * k + transform.x, sy = pt[1] * k + transform.y;
+      if (sx < xmin + 4 || sx > xmax - 4 || sy < 4 || sy > H - 4) continue;
+      const sz = e.cur ? 6.5 : 5.5;
+      const fs = e.cur ? 12 : 11;
+      ctx.font = `${e.cur ? 600 : 500} ${fs}px ${family}`;
+      const label = e.t;
+      const tw = ctx.measureText(label).width, hh = fs * 0.62;
+      let b = [sx - sz - 1, sy - hh, sx + sz + 5 + tw + 2, sy + hh], align = "left", withLabel = true;
+      if (hit(b) || b[2] > xmax) {
+        b = [sx - sz - 5 - tw - 2, sy - hh, sx + sz + 1, sy + hh]; align = "right";
+        if (hit(b) || b[0] < xmin) { withLabel = false; b = [sx - sz - 1, sy - sz - 1, sx + sz + 1, sy + sz + 1]; if (hit(b)) continue; }
+      }
+      boxes.push(b); shown++;
+      const alpha = 1 - 0.55 * (d / w);
+      ctx.globalAlpha = alpha;
+      evShape(ctx, e.cat, sx, sy, sz);
+      ctx.fillStyle = EV[e.cat].color; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = "#0a1219"; ctx.stroke();
+      if (openEvent === e) { ctx.beginPath(); ctx.arc(sx, sy, sz + 5, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = C.brass; ctx.stroke(); }
+      if (withLabel) {
+        ctx.textAlign = align;
+        const tx = align === "left" ? sx + sz + 4 : sx - sz - 4;
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.85)"; ctx.strokeText(label, tx, sy);
+        ctx.fillStyle = EV[e.cat].color; ctx.fillText(label, tx, sy);
+      }
+      ctx.globalAlpha = 1;
+      eventHits.push({ x: sx, y: sy, r: sz, e });
+    }
+    ctx.textAlign = "center";
+  }
+  function eventAt(x, y) {
+    let best = null, bd = 1e9;
+    for (const h of eventHits) { const d = Math.hypot(h.x - x, h.y - y); if (d <= h.r + 6 && d < bd) { bd = d; best = h; } }
+    return best;
+  }
+  const evYearText = (e) => (e.approx ? "around " : "") + fmtS(e.y);
+
   // ---------- drawing ----------
   let drawQueued = false;
   function draw() {
@@ -881,7 +1033,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     requestAnimationFrame(() => { drawQueued = false; drawNow(); });
   }
   function drawNow() {
-    cityHits = [];
+    cityHits = []; eventHits = [];
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = C.void; ctx.fillRect(0, 0, W, H);
     if (compare) {
@@ -961,6 +1113,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
     }
 
+    drawEvents(sceneYear, boxes, clip);
     drawCities(sceneYear, boxes, clip);
 
     // today's country names: small italic caps, fitted around the historical labels
@@ -1022,8 +1175,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   function setYear(y, dir) {
     y = Math.max(MIN_Y, Math.min(MAX_Y, Math.round(y)));
     if (y === 0) y = (dir || 1) > 0 ? 1 : -1;
+    const prevYear = year;
     year = y;
     slider.value = y;
+    if (typeof tickerStep === "function") tickerStep(prevYear, y);
     const [n, era] = fmt(y);
     $("yearLabel").innerHTML = `${n}<small>${era}</small>`;
     computeVisible();
@@ -1175,6 +1330,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     downAt = null;
     if (moved > 5 || quiz) return;
     const ll = screenToLL(e.clientX, e.clientY);
+    const eh = eventAt(e.clientX, e.clientY);
+    if (eh) { showEvent(eh.e); return; }
     const ch = cityAt(e.clientX, e.clientY);
     if (ch) { openSpot(ch.c.ll, ch.name); return; }
     if (pickMode) { if (ll) openSpot(ll); return; }
@@ -1195,6 +1352,16 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     if (hoverQueued) return; hoverQueued = true;
     requestAnimationFrame(() => {
       hoverQueued = false;
+      const eh = eventAt(lastMove.clientX, lastMove.clientY);
+      if (eh) {
+        if (hovered) { hovered = null; draw(); }
+        tip.textContent = `${evYearText(eh.e)} · ${eh.e.t}`;
+        tip.style.display = "block";
+        tip.style.left = Math.min(W - tip.offsetWidth - 8, lastMove.clientX + 14) + "px";
+        tip.style.top = (lastMove.clientY + 14) + "px";
+        canvas.style.cursor = "pointer";
+        return;
+      }
       const ch = cityAt(lastMove.clientX, lastMove.clientY);
       if (ch) {
         if (hovered) { hovered = null; draw(); }
@@ -1221,6 +1388,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   function renderInfo() {
     const box = $("info");
     if (!selected) { box.classList.remove("show"); $("infoMore").innerHTML = ""; $("infoChart").innerHTML = ""; return; }
+    if (openEvent) { openEvent = null; $("evCard").classList.remove("show"); }
     const o = selected, s = spans.get(o.name), p = o.p;
     $("infoName").innerHTML = `<span class="swatch" style="background:${o.color}"></span>`;
     $("infoName").appendChild(document.createTextNode(o.label));
@@ -1720,7 +1888,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     if (!rounds.length) return;
     const saved = store.get("wre-quiz-" + ds);
     quiz = { ds, n: dayNumber(ds), rounds, i: 0, answers: (saved && saved.answers) || [], prevYear: year, prevT: transform, done: false, revealed: false };
-    selected = null; hovered = null; renderInfo();
+    selected = null; hovered = null; renderInfo(); closeEvent(); $("ticker").innerHTML = "";
     document.body.classList.add("quiz-mode");
     $("quiz").classList.add("show");
     track("quiz_start", { quiz_day: quiz.n });
@@ -2183,7 +2351,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       const w = c.measureText(n).width;
       c.fillStyle = C.brass; c.font = `600 ${34 * u}px ${body}`; c.fillText(era, 82 * u + w, r.height - 84 * u);
       c.fillStyle = "rgba(233,228,216,0.7)"; c.font = `500 ${22 * u}px ${body}`;
-      c.fillText(compare ? `left side · right side ${fmtS(compare.yearB)}` : `${visible.filter(o => !o.rel).length} polities`, 72 * u, r.height - 52 * u);
+      const tick = lastTicker && Math.abs(lastTicker.y - year) <= evWindow(lastTicker.y) ? `${fmtS(lastTicker.y)} · ${lastTicker.t}` : null;
+      c.fillText(compare ? `left side · right side ${fmtS(compare.yearB)}` : (tick || `${visible.filter(o => !o.rel).length} polities`), 72 * u, r.height - 52 * u);
       c.textAlign = "right"; c.fillStyle = C.brass; c.font = `600 ${30 * u}px ${body}`;
       c.fillText("whoruled.earth", r.width - 44 * u, r.height - 54 * u);
       rec.raf = requestAnimationFrame(comp);
@@ -2279,6 +2448,77 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   phone.addEventListener?.("change", () => { setMenu(false); setSearchOpen(false); });
 
   $("showCities").addEventListener("change", (e) => { showCities = e.target.checked; draw(); });
+
+  // ----- event card -----
+  const evSummaryCache = new Map();
+  function showEvent(e) {
+    openEvent = e;
+    selected = null; renderInfo();
+    $("evKicker").innerHTML = `${evShapeSVG(e.cat).replace("<svg", '<svg style="width:10px;height:10px;display:inline-block;vertical-align:-1px;margin-right:6px"')}${esc(EV[e.cat].label)}`;
+    $("evTitle").textContent = e.t;
+    $("evWhen").textContent = evYearText(e);
+    $("evText").textContent = e.d || "";
+    $("evSrc").textContent = e.d ? "" : "Loading a summary from Wikipedia…";
+    $("evJump").textContent = `Go to ${fmtS(e.y)}`;
+    const links = $("evLinks"); links.innerHTML = "";
+    if (e.w) { const a = document.createElement("a"); a.href = "https://en.wikipedia.org/wiki/" + encodeURIComponent(e.w.replace(/ /g, "_")); a.target = "_blank"; a.rel = "noopener"; a.textContent = "Read on Wikipedia ↗"; links.appendChild(a); }
+    $("evCard").classList.add("show");
+    track("event_open", { event: e.t });
+    draw();
+    if (!e.d && e.w) {
+      const key = e.w;
+      const pr = evSummaryCache.get(key) || fetchJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(e.w.replace(/ /g, "_"))}?redirect=true`).then(j => j && j.extract ? j.extract : null);
+      evSummaryCache.set(key, pr);
+      pr.then(txt => {
+        if (openEvent !== e) return;
+        if (txt) { let t = txt; if (t.length > 420) { const cut = t.slice(0, 420), dot = cut.lastIndexOf(". "); t = dot > 150 ? cut.slice(0, dot + 1) : cut.replace(/\s+\S*$/, "") + "…"; } $("evText").textContent = t; $("evSrc").textContent = "From Wikipedia"; }
+        else $("evSrc").textContent = "";
+      }, () => { evSummaryCache.delete(key); if (openEvent === e) $("evSrc").textContent = "Couldn't load a summary from Wikipedia."; });
+    } else if (!e.d) $("evSrc").textContent = "";
+  }
+  function closeEvent() { openEvent = null; $("evCard").classList.remove("show"); draw(); }
+  $("evClose").onclick = closeEvent;
+  $("evJump").onclick = () => { const e = openEvent; if (!e) return; pause(); tourHold(); setYear(Math.max(MIN_Y, Math.min(MAX_Y, e.y)), 1); flyTo(e.ll, Math.max(transform.k, 4)); writeHash(); };
+  $("evSpot").onclick = () => { const e = openEvent; if (!e) return; closeEvent(); openSpot(e.ll, e.t); };
+
+  // ----- ticker: names events as playback passes them -----
+  let tickPrev = null;
+  function tickerStep(prevY, y) {
+    if (!events || !showEvents || quiz || !playing || y <= prevY) return;
+    const passed = [];
+    for (const e of events) { if (e.y > prevY && e.y <= y && evCats[e.cat] && (e.cur || e.imp >= 45)) passed.push(e); }
+    if (!passed.length) return;
+    passed.sort((a, b) => b.imp - a.imp);
+    for (const e of passed.slice(0, 2).reverse()) pushTicker(e);
+  }
+  function pushTicker(e) {
+    const box = $("ticker");
+    const b = document.createElement("button"); b.type = "button";
+    b.innerHTML = `${evShapeSVG(e.cat).replace("<svg", '<svg style="width:11px;height:11px;flex:none"')}<b>${esc(evYearText(e))}</b><span class="t">${esc(e.t)}</span>`;
+    b.onclick = () => { pause(); showEvent(e); setYear(e.y, 1); };
+    box.prepend(b);
+    while (box.children.length > 3) box.lastChild.remove();
+    lastTicker = e;
+    setTimeout(() => { b.classList.add("out"); setTimeout(() => b.remove(), 650); }, 3800);
+  }
+  let lastTicker = null;
+
+  // ----- filters -----
+  $("evTypes").innerHTML = Object.entries(EV).map(([k, v]) => `<button type="button" class="ev-type" data-cat="${k}" aria-pressed="true" title="Show ${esc(v.label.toLowerCase())}">${evShapeSVG(k)}${esc(v.label)}</button>`).join("");
+  $("evTypes").querySelectorAll("[data-cat]").forEach(b => b.onclick = () => {
+    const k = b.dataset.cat; evCats[k] = !evCats[k]; b.setAttribute("aria-pressed", String(evCats[k])); draw();
+  });
+  $("showEvents").addEventListener("change", (e) => {
+    showEvents = e.target.checked; $("evTypes").hidden = !showEvents;
+    if (!showEvents) { closeEvent(); $("ticker").innerHTML = ""; }
+    draw();
+  });
+
+  Promise.all([
+    fetch("events.json").then(r => r.json()),
+    fetch("events-wikidata.json").then(r => r.ok ? r.json() : []).catch(() => []),
+  ]).then(([cur, wd]) => { events = buildEvents(cur, wd); draw(); })
+    .catch(() => { $("showEvents").checked = false; $("showEvents").disabled = true; });
   fetch("cities.json").then(r => r.json()).then(rows => {
     cities = rows.map(([n, alt, lon, lat, o]) => ({ n, alt, ll: [lon, lat], o }));
     draw();
