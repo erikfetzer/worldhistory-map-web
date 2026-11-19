@@ -796,13 +796,22 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   // ---------- today's borders (Natural Earth 1:50m via world-atlas) ----------
   function loadModern() {
     if (modern || modernLoading) return modernLoading;
-    modernLoading = fetch("countries.json").then(r => r.json()).then(t => {
+    modernLoading = Promise.all([
+      fetch("countries.json").then(r => r.json()),
+      fetch("admin1.json").then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([t, a1]) => {
       const obj = t.objects.countries;
       modern = {
         feats: topojson.feature(t, obj).features.filter(f => f.geometry),
         inner: topojson.mesh(t, obj, (a, b) => a !== b),
         outer: topojson.mesh(t, obj, (a, b) => a === b),
       };
+      if (a1) {
+        // US states and Canadian provinces: only the lines between them, not coasts or national borders
+        const ao = a1.objects[Object.keys(a1.objects)[0]];
+        modern.adminFeats = topojson.feature(a1, ao).features.filter(f => f.geometry);
+        modern.adminInner = topojson.mesh(a1, ao, (a, b) => a !== b && a.properties.adm0_a3 === b.properties.adm0_a3);
+      }
       buildModern(); draw();
     }).catch(() => {
       modernLoading = null;
@@ -815,6 +824,19 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     if (!modern) return;
     modern.innerPath = new Path2D(); d3.geoPath(projection, modern.innerPath)(modern.inner);
     modern.outerPath = new Path2D(); d3.geoPath(projection, modern.outerPath)(modern.outer);
+    if (modern.adminInner) {
+      modern.adminPath = new Path2D(); d3.geoPath(projection, modern.adminPath)(modern.adminInner);
+      modern.adminLabels = modern.adminFeats.map(f => {
+        let target = f, best = -1;
+        if (f.geometry.type === "MultiPolygon") {
+          for (const poly of f.geometry.coordinates) {
+            const pf = { type: "Feature", geometry: { type: "Polygon", coordinates: poly } };
+            const a = geoPath.area(pf); if (a > best) { best = a; target = pf; }
+          }
+        } else best = geoPath.area(f);
+        return { name: f.properties.name, code: f.properties.postal, area: best, c: geoPath.centroid(target) };
+      }).filter(l => l.name && isFinite(l.c[0])).sort((a, b) => b.area - a.area);
+    }
     modern.labels = modern.feats.map(f => {
       let target = f, best = -1;
       if (f.geometry.type === "MultiPolygon") {
@@ -1090,6 +1112,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.setLineDash([4 / k, 3 / k]);
       ctx.strokeStyle = "rgba(10,18,25,0.55)"; ctx.lineWidth = 2.2 / k; ctx.stroke(modern.innerPath);
       ctx.strokeStyle = "rgba(240,236,226,0.85)"; ctx.lineWidth = 1 / k; ctx.stroke(modern.innerPath);
+      if (modern.adminPath) {
+        ctx.setLineDash([1.6 / k, 2.6 / k]);
+        ctx.strokeStyle = "rgba(240,236,226,0.6)"; ctx.lineWidth = 0.8 / k; ctx.stroke(modern.adminPath);
+      }
       ctx.setLineDash([]);
     }
 
@@ -1133,6 +1159,25 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
         boxes.push(b);
         ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.75)"; ctx.strokeText(text, sx, sy);
         ctx.fillStyle = "rgba(240,236,226,0.82)"; ctx.fillText(text, sx, sy);
+      }
+      // US state and Canadian province names: smaller and quieter; postal codes when space is tight
+      if (modern.adminLabels) {
+        for (const l of modern.adminLabels) {
+          const sx = l.c[0] * k + transform.x, sy = l.c[1] * k + transform.y;
+          if (sx < -50 || sx > W + 50 || sy < -20 || sy > H + 20) continue;
+          const lin = Math.sqrt(l.area) * k;
+          let text = l.name.toUpperCase();
+          let size = Math.min(10.5, (lin * 0.85) / (text.length * 0.72));
+          if (size < 7.5 && l.code) { text = l.code; size = Math.min(10.5, (lin * 0.7) / (text.length * 0.8)); }
+          if (size < 7.5) continue;
+          ctx.font = `italic 500 ${size.toFixed(1)}px ${family}`;
+          const w = ctx.measureText(text).width, h = size * 1.3;
+          const b = [sx - w / 2 - 2, sy - h / 2, sx + w / 2 + 2, sy + h / 2];
+          if (boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]))) continue;
+          boxes.push(b);
+          ctx.lineWidth = 2.5; ctx.strokeStyle = "rgba(10,18,25,0.7)"; ctx.strokeText(text, sx, sy);
+          ctx.fillStyle = "rgba(240,236,226,0.62)"; ctx.fillText(text, sx, sy);
+        }
       }
       if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
     }

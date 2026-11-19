@@ -12,7 +12,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - Pan and zoom (scroll, drag, pinch), hover names, and click for details with Wikipedia/Wikidata links
 - Search for a polity to jump to its time and zoom to it
 - Optional dashed outlines for alliances and overlordships
-- "Today's borders" toggle: overlays modern country outlines and names on any year
+- "Today's borders" toggle: overlays modern country outlines and names on any year, plus US states and Canadian provinces
 - **Who ruled here?** Right-click (or long-press, or use the button) on any spot to see every power that held it from 3400 BCE to today, as a timeline and a clickable list
 - **Daily quiz:** five rounds a day (one per era), same questions for everyone that day, with a streak counter and a shareable score grid. Results stay in the visitor's browser
 - **Guided tours:** captioned stories that move the map and the timeline (Rome, Alexander, the Mongols, the scramble for Africa, World War I)
@@ -37,6 +37,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 | `scripts/og-card.html` | Renders `og.png`: serve the repo root, open it, screenshot `#card` (add `?year=` to pick a year) |
 | `events.json` | Hand-picked headline events (written in `data-src/events-curated.py`) |
 | `events-wikidata.json` | Famous events from Wikidata, refreshed monthly by `.github/workflows/events.yml` running `scripts/build-events-wikidata.py` |
+| `admin1.json` | US states and Canadian provinces (Natural Earth 1:50m, public domain), part of the "Today's borders" overlay |
 | `cities.json` | Merged historical city populations (built by `scripts/build-cities.py` from `data-src/cities/`) |
 | `scripts/build-data.sh` | Rebuilds `borders.json` and `land.json` from the sources |
 

@@ -12,11 +12,12 @@ import json, sys, time, urllib.parse, urllib.request
 ENDPOINT = "https://query.wikidata.org/sparql"
 UA = "whoruled.earth events builder (https://whoruled.earth; https://github.com/erikfetzer/worldhistory-map-web)"
 
-# category -> list of (Wikidata class, minimum sitelinks)
+# category -> list of (Wikidata class, minimum sitelinks[, latest year to include])
+# Assassinations stop at 1990: recent killings of individuals are news, not settled history.
 CLASSES = {
     "war": [("Q178561", 22), ("Q188055", 18), ("Q1261499", 18)],                      # battle, siege, naval battle
     "politics": [("Q131569", 12), ("Q625298", 12), ("Q10931", 12), ("Q124734", 14),     # treaty, peace treaty, revolution, rebellion
-                 ("Q3882219", 14), ("Q45382", 18)],                                     # assassination, coup d'état
+                 ("Q3882219", 14, 1990), ("Q45382", 18)],                                     # assassination, coup d'état
     "exploration": [("Q2401485", 10)],                                                  # expedition
     "disaster": [("Q7944", 16), ("Q7692360", 14), ("Q8070", 14), ("Q168983", 16)],      # earthquake, eruption, tsunami, great fire
 }
@@ -68,7 +69,9 @@ def year_of(dt):
 events = {}
 cur_kind = {}
 for cat, classes in CLASSES.items():
-    for cls, mn in classes:
+    for spec in classes:
+        cls, mn = spec[0], spec[1]
+        max_year = spec[2] if len(spec) > 2 else 9999
         rows = run(QUERY % {"cls": cls, "min": mn})
         print(f"{cat} {cls}: {len(rows)} rows", file=sys.stderr)
         for b in rows:
@@ -98,7 +101,7 @@ for cat, classes in CLASSES.items():
                 y, kind = end, 2
             else:
                 continue
-            if y < -3400 or y > 2025:
+            if y < -3400 or y > 2025 or y > max_year:
                 continue
             art = b.get("article", {}).get("value", "")
             wiki = urllib.parse.unquote(art.rsplit("/wiki/", 1)[-1]).replace("_", " ") if art else ""
