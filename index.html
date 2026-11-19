@@ -174,6 +174,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #infoMore .extract { line-height: 1.5; margin: 0 0 2px; }
 #infoMore .src { color: var(--muted); font-size: 11px; }
 #infoMore h4 { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+#infoMore .rnow { margin: 2px 0 6px; font-size: 13.5px; } #infoMore .rnow b { color: var(--brass); font-weight: 600; }
 #infoMore ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
 #infoMore .num { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--brass); color: #1b1408; font-size: 10px; font-weight: 700; }
 #infoMore .num.off { background: rgba(233,228,216,0.16); color: var(--muted); }
@@ -1927,6 +1928,16 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     }
     return out;
   }
+  // Many modern countries list only the current head of state (P35), so we also pull every
+  // holder of the head-of-state office (P1906 → people with P39 = that office, with dates).
+  const sparqlYear = (t) => { const m = /^(-?)(\d+)-/.exec(t || ""); if (!m) return null; const y = parseInt(m[2], 10); return m[1] ? -(y + 1) : (y === 0 ? -1 : y); };
+  async function officeHolders(offices) {
+    const q = `SELECT ?p ?pLabel ?s ?e WHERE { VALUES ?o { ${offices.map(o => "wd:" + o).join(" ")} } ?p p:P39 ?st . ?st ps:P39 ?o ; pq:P580 ?s . OPTIONAL { ?st pq:P582 ?e } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 600`;
+    const j = await fetchJSON("https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(q), 12000);
+    return (j.results?.bindings || []).map(b => ({
+      id: b.p.value.split("/").pop(), name: b.pLabel?.value, from: sparqlYear(b.s?.value), to: sparqlYear(b.e?.value),
+    })).filter(r => r.name && r.from != null && !/^Q\d+$/.test(r.name));
+  }
   function loadExtra(o) {
     const key = extraKey(o);
     if (extraCache.has(key)) return extraCache.get(key);
@@ -1943,13 +1954,17 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
         const ent = (await wbEntities([qid], "claims"))[qid];
         if (ent) {
           rulers = claimList(ent, "P35"); capitals = claimList(ent, "P36"); events = claimList(ent, "P793");
-          const rulerInfo = await wbEntities([...new Set(rulers.map(r => r.id))], "labels");
+          const offices = claimList(ent, "P1906").map(c => c.id).slice(0, 3);
+          if (offices.length) { try { rulers = rulers.concat(await officeHolders(offices)); } catch (e) { /* keep P35 only */ } }
+          const datedIds = new Set(rulers.filter(r => r.from != null).map(r => r.id));
+          rulers = rulers.filter(r => r.from != null || !datedIds.has(r.id));
+          const rulerInfo = await wbEntities([...new Set(rulers.filter(r => !r.name).map(r => r.id))], "labels");
           const placeInfo = await wbEntities([...new Set([...capitals, ...events].map(r => r.id))], "labels|claims");
           const lab = (info, id) => info[id]?.labels?.en?.value || null;
           const coord = (id) => { const v = placeInfo[id]?.claims?.P625?.[0]?.mainsnak?.datavalue?.value; return v && isFinite(v.longitude) ? [v.longitude, v.latitude] : null; };
           const when = (id) => { const c = placeInfo[id]?.claims || {}; return yearOf(c.P585?.[0]?.mainsnak?.datavalue?.value) ?? yearOf(c.P580?.[0]?.mainsnak?.datavalue?.value) ?? yearOf(c.P571?.[0]?.mainsnak?.datavalue?.value); };
           const seen = new Set();
-          rulers = rulers.map(r => ({ ...r, name: lab(rulerInfo, r.id) })).filter(r => r.name && !seen.has(r.id + r.from) && seen.add(r.id + r.from))
+          rulers = rulers.map(r => ({ ...r, name: r.name || lab(rulerInfo, r.id) })).filter(r => r.name && !seen.has(r.id + r.from) && seen.add(r.id + r.from))
             .sort((a, b) => (a.from ?? 1e9) - (b.from ?? 1e9));
           capitals = capitals.map(c => ({ ...c, name: lab(placeInfo, c.id), ll: coord(c.id) })).filter(c => c.name);
           events = events.map(e => ({ ...e, name: lab(placeInfo, e.id), ll: coord(e.id), year: e.at ?? when(e.id) })).filter(e => e.name)
@@ -2012,7 +2027,11 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
         const a = Math.max(0, Math.min(list.length - 7, c - 3));
         list = list.slice(a, a + 7);
       }
-      html += `<h4>Rulers <span class="muted">(${ex.rulers.length})</span></h4><ol>` + list.map(({ r, i }) =>
+      const anyDated = ex.rulers.some(r => r.from != null);
+      html += `<h4>Rulers <span class="muted">(${ex.rulers.length})</span></h4>`;
+      if (now >= 0) html += `<div class="rnow">In ${esc(fmtS(year))}: <b>${esc(ex.rulers[now].name)}</b></div>`;
+      else if (anyDated) html += `<p class="muted" style="margin:2px 0 6px">No one on Wikidata's list held power in ${esc(fmtS(year))}.</p>`;
+      html += `<ol>` + list.map(({ r, i }) =>
         `<li class="${i === now ? "cur" : ""}"><button type="button" data-ruler="${i}"><span></span><span>${esc(r.name)}${i === now ? ' <span class="muted">· in power</span>' : ""}</span><span class="yrs">${r.from != null ? esc(r.to != null ? yrs(r.from, r.to) : "from " + fmtS(r.from)) : ""}</span></button></li>`).join("") + `</ol>`;
     }
     if (ex.events.length) {
