@@ -133,6 +133,92 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 @media (prefers-reduced-motion: reduce) { #crumbNote svg { animation: none; } }
 
 .mobile-only { display: none; }
+
+/* feature buttons in the title box */
+.feature-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.pill { font-size: 12px; font-weight: 600; padding: 5px 11px; min-height: 30px; border-radius: 999px; background: rgba(217,169,91,0.14); border: 1px solid rgba(217,169,91,0.45); color: var(--ink); }
+.pill:hover { background: rgba(217,169,91,0.26); }
+.pill[aria-pressed="true"] { background: var(--brass); color: #1b1408; }
+.primary { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
+#toast { position: fixed; left: 50%; top: 16px; transform: translateX(-50%); background: var(--brass); color: #1b1408; font-weight: 600; border-radius: 999px; padding: 8px 16px; font-size: 13px; display: none; z-index: 6; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+#toast.show { display: block; }
+
+/* floating panels */
+.panel { position: fixed; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; backdrop-filter: blur(8px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+.panel .kicker { color: var(--brass); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; padding-right: 28px; }
+.panel h2 { font-family: var(--font-display); font-weight: 650; margin: 2px 0 6px; text-wrap: balance; }
+.panel .x { position: absolute; top: 8px; right: 8px; border: none; background: none; color: var(--muted); font-size: 20px; line-height: 1; min-height: 0; padding: 4px 8px; }
+.panel .x:hover { color: var(--ink); }
+
+/* who ruled here */
+#spot { left: 16px; top: 168px; width: 420px; max-height: calc(100% - 176px - var(--dockH, 200px)); overflow-y: auto; padding: 14px 16px; display: none; }
+#spot.show { display: block; }
+#spot h2 { font-size: 19px; font-variant-numeric: tabular-nums; }
+#spotSub { color: var(--muted); font-size: 12px; }
+#spotStrip { width: 100%; display: block; margin: 12px 0 2px; cursor: pointer; }
+.strip-ticks { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#spotList { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; }
+#spotList button, #infoMore li button { width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; text-align: left; background: none; border: 1px solid transparent; padding: 5px 6px; min-height: 0; font-size: 13px; }
+#spotList button:hover, #infoMore li button:hover { border-color: var(--line); background: rgba(255,255,255,0.04); }
+#spotList button.now, #infoMore li.cur button { border-color: rgba(217,169,91,0.6); background: rgba(217,169,91,0.10); }
+.yrs { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* details card extras: summary, capital, rulers, events */
+#info { width: 340px; max-height: calc(100% - 88px - var(--dockH, 200px)); overflow-y: auto; }
+#infoMore { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; font-size: 13px; }
+#infoMore:empty { display: none; }
+#infoMore .extract { line-height: 1.5; margin: 0 0 2px; }
+#infoMore .src { color: var(--muted); font-size: 11px; }
+#infoMore h4 { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+#infoMore ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+#infoMore .num { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--brass); color: #1b1408; font-size: 10px; font-weight: 700; }
+#infoMore .num.off { background: rgba(233,228,216,0.16); color: var(--muted); }
+#infoMore .muted, .muted { color: var(--muted); }
+#infoMore .more { margin-top: 4px; font-size: 12px; }
+#info .links button.linkbtn { font-size: 13px; }
+
+/* daily quiz */
+body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode #spot, body.quiz-mode #tourCard, body.quiz-mode #tip, body.quiz-mode #crumbNote { display: none !important; }
+#quiz { left: 50%; transform: translateX(-50%); bottom: 16px; width: min(640px, calc(100% - 32px)); padding: 16px 18px; display: none; max-height: calc(100% - 32px); overflow-y: auto; }
+#quiz.show { display: block; }
+#quiz h2 { font-size: 22px; }
+#quiz h2 .yr { color: var(--brass); white-space: nowrap; }
+.qopts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 8px; }
+.qopts button { text-align: left; padding: 10px 12px; min-height: 46px; font-weight: 500; line-height: 1.25; }
+.qopts button.right { background: rgba(110,190,120,0.22); border-color: #6ebe78; }
+.qopts button.wrong { background: rgba(214,96,86,0.22); border-color: #d66056; }
+.qopts button:disabled { cursor: default; }
+.qfeedback { min-height: 20px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.qfeedback b { color: var(--ink); }
+.qfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.qdots { display: flex; gap: 6px; }
+.qdots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(233,228,216,0.18); }
+.qdots .ok { background: #6ebe78; } .qdots .no { background: #d66056; }
+.qdots .cur { outline: 2px solid var(--brass); outline-offset: 2px; }
+.qgrid { font-size: 28px; letter-spacing: 4px; margin: 4px 0; }
+.qstats { display: flex; gap: 18px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.qstats b { color: var(--ink); font-size: 18px; display: block; }
+.qreview { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 2px; }
+.qreview button { width: 100%; display: grid; grid-template-columns: 18px auto 1fr; gap: 8px; text-align: left; background: none; border: 1px solid transparent; padding: 5px 6px; min-height: 0; font-size: 13px; }
+.qreview button:hover { border-color: var(--line); }
+.qcopy { width: 100%; font: inherit; font-size: 13px; background: rgba(255,255,255,0.06); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin-top: 8px; resize: none; }
+
+/* guided tours */
+#tourCard { left: 16px; bottom: calc(var(--dockH, 200px) + 8px); width: 440px; padding: 14px 16px 12px; display: none; }
+#tourCard.show { display: block; }
+#tourCard .tyear { font-family: var(--font-display); font-weight: 650; font-size: 28px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+#tourCard .tyear small { font-family: var(--font-body); font-size: 13px; color: var(--brass); margin-left: 4px; letter-spacing: 0.06em; }
+#tourCard p { margin: 6px 0 10px; line-height: 1.5; max-width: 60ch; }
+.tour-progress { height: 3px; background: rgba(233,228,216,0.14); border-radius: 2px; overflow: hidden; margin: 8px 0 10px; }
+.tour-progress i { display: block; height: 100%; background: var(--brass); width: 0; transition: width 0.4s; }
+.tour-controls { display: flex; gap: 8px; align-items: center; }
+.tour-controls .spacer { flex: 1; }
+.tour-list { display: grid; gap: 10px; margin-top: 12px; }
+.tour-item { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,0.03); }
+.modal .tour-item h3 { margin: 0; text-transform: none; letter-spacing: 0; color: var(--ink); font-size: 17px; font-family: var(--font-display); font-weight: 650; }
+.modal .tour-item p { margin: 0; color: var(--muted); font-size: 13px; grid-column: 1; }
+.tour-item button { grid-row: 1 / span 2; grid-column: 2; }
 #loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--font-display); font-size: 22px; color: var(--muted); background: var(--void); }
 
 @media (max-width: 760px) {
@@ -159,6 +245,12 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   #yearLabel { font-size: 30px; }
   .sep { display: none; }
   #info { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 40vh; overflow-y: auto; }
+  #spot { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 45vh; }
+  #tourCard { left: 8px; right: 8px; width: auto; bottom: var(--dockH, 380px); }
+  #quiz { bottom: 8px; width: calc(100% - 16px); padding: 14px; }
+  #quiz h2 { font-size: 19px; }
+  .qopts { grid-template-columns: 1fr; }
+  .feature-row .pill { padding: 5px 9px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -170,7 +262,12 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 <div class="top">
   <div class="brand">
     <h1>World History Map</h1>
-    <p>Political borders from 3400 BCE to 2024 CE. Drag to pan, scroll or pinch to zoom, click a territory for details.</p>
+    <p>Political borders from 3400 BCE to 2024 CE. Drag to pan, scroll or pinch to zoom, click a territory for details. Right-click any spot to see everyone who ruled it.</p>
+    <div class="feature-row">
+      <button type="button" class="pill" data-open="tours">Tours</button>
+      <button type="button" class="pill" id="openQuiz">Daily quiz</button>
+      <button type="button" class="pill" id="pickSpot" aria-pressed="false" title="Or right-click / long-press any spot">Who ruled here?</button>
+    </div>
     <div class="links">
       <button type="button" class="linkbtn" data-open="resources">Resources &amp; sources</button>
       <button type="button" class="linkbtn" data-open="disclaimer">Disclaimer</button>
@@ -187,9 +284,47 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   <button class="close" id="infoClose" aria-label="Close details">×</button>
   <h2 id="infoName"></h2>
   <dl id="infoDl"></dl>
+  <div id="infoMore"></div>
   <div class="links" id="infoLinks"></div>
 </div>
 <div id="tip"></div>
+<div id="toast" role="status"></div>
+
+<section id="spot" class="panel" aria-label="Who ruled here">
+  <button type="button" class="x" id="spotClose" aria-label="Close">×</button>
+  <div class="kicker">Who ruled here?</div>
+  <h2 id="spotTitle"></h2>
+  <div id="spotSub"></div>
+  <svg id="spotStrip" preserveAspectRatio="none" role="img" aria-label="Timeline of rulers at this spot; click to jump to a year"></svg>
+  <div class="strip-ticks"><span>3400 BCE</span><span>1 CE</span><span>2024 CE</span></div>
+  <ol id="spotList"></ol>
+</section>
+
+<section id="quiz" class="panel" aria-live="polite" aria-label="Daily quiz"></section>
+
+<section id="tourCard" class="panel" aria-live="polite" aria-label="Guided tour">
+  <button type="button" class="x" id="tourExit" aria-label="End tour">×</button>
+  <div class="kicker" id="tourKicker"></div>
+  <div class="tyear" id="tourYear"></div>
+  <p id="tourText"></p>
+  <div class="tour-progress"><i id="tourBar"></i></div>
+  <div class="tour-controls">
+    <button type="button" id="tourPrev">‹ Back</button>
+    <button type="button" id="tourPlay">❚❚ Pause</button>
+    <span class="spacer"></span>
+    <button type="button" class="primary" id="tourNext">Next ›</button>
+  </div>
+</section>
+
+<dialog class="modal" id="dlg-tours" aria-labelledby="toursTitle">
+  <div class="modal-inner">
+    <button type="button" class="close-x" data-close aria-label="Close">×</button>
+    <div class="kicker">Press play on history</div>
+    <h2 id="toursTitle">Guided tours</h2>
+    <p>Each tour moves the map and the timeline for you, with a short note at each stop. Pause or skip any time.</p>
+    <div class="tour-list" id="tourList"></div>
+  </div>
+</dialog>
 
 <aside id="crumbNote" role="region" aria-label="A note about crumbs">
   <button type="button" class="note-x" id="crumbX" aria-label="Close this note">×</button>
@@ -226,6 +361,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     <p>Spot a mistake? Corrections to the underlying data go to the Seshat Global History Databank, which reviews them with historians. See <button type="button" class="linkbtn" data-open="resources">Resources</button> for links.</p>
     <h3>Privacy</h3>
     <p>Every visit is counted by Vercel Web Analytics, which uses no cookies and doesn't identify you: it records the page, a rough location and your browser type.</p>
+    <p>When you open a territory's details, your browser asks Wikipedia and Wikidata for its summary, rulers and events. Quiz results are saved only in your browser.</p>
     <p>If you click "Accept all empires", the site also loads Google Analytics, which sets cookies to count visits and see how the map is used. If you choose "No thanks" or close the note, Google Analytics never loads. Either way, your browser stores one small flag so the note stays closed. There are no ads, and nothing is sold. Clicking a Wikipedia or Wikidata link takes you to those sites, which have their own policies.</p>
     <p><button type="button" class="linkbtn" id="resetConsent">Change my cookie choice</button></p>
     <h3>No warranty</h3>
@@ -252,7 +388,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     <ul>
       <li><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>: the land outline (public domain), via the <a href="https://github.com/topojson/world-atlas" target="_blank" rel="noopener">world-atlas</a> package.</li>
       <li><a href="https://d3js.org/" target="_blank" rel="noopener">D3</a> and <a href="https://github.com/topojson/topojson-client" target="_blank" rel="noopener">TopoJSON</a>: projection and drawing.</li>
-      <li>Each territory links to its <a href="https://www.wikipedia.org/" target="_blank" rel="noopener">Wikipedia</a> article and <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> entry. Click any shape on the map.</li>
+      <li>Each territory links to its <a href="https://www.wikipedia.org/" target="_blank" rel="noopener">Wikipedia</a> article and <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> entry. Summaries come live from Wikipedia; capitals, rulers and key events come live from Wikidata, so how much appears depends on how complete each entry is.</li>
     </ul>
     <h3>Explore further</h3>
     <ul>
@@ -495,6 +631,8 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   let selected = null, hovered = null;
   let showRel = false;
   let showModern = false, modern = null, modernLoading = null;
+  let spot = null, quiz = null, tour = null, pickMode = false, lastClickLL = null;
+  const extraResolved = new Map();
 
   function computeVisible() {
     visible = feats.filter(o => o.from <= year && year <= o.to && (showRel || !o.rel));
@@ -559,7 +697,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     ctx.lineJoin = "round";
     for (const o of visible) {
       if (o.rel || !inView(o.bounds)) continue;
-      ctx.globalAlpha = 0.86; ctx.fillStyle = o.color; ctx.fill(o.path);
+      ctx.globalAlpha = quizTarget() && o !== quizTarget() ? 0.42 : 0.86; ctx.fillStyle = o.color; ctx.fill(o.path);
       ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(10,18,25,0.85)"; ctx.lineWidth = 0.9 / k; ctx.stroke(o.path);
     }
     if (showRel) {
@@ -570,7 +708,12 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
       }
       ctx.setLineDash([]);
     }
-    if (hovered && hovered !== selected && visible.includes(hovered)) {
+    const qt = quizTarget();
+    if (qt && qt.path) {
+      ctx.strokeStyle = "rgba(10,18,25,0.9)"; ctx.lineWidth = 5 / k; ctx.stroke(qt.path);
+      ctx.strokeStyle = C.brass; ctx.lineWidth = 2.6 / k; ctx.stroke(qt.path);
+    }
+    if (!quiz && hovered && hovered !== selected && visible.includes(hovered)) {
       ctx.strokeStyle = "rgba(233,228,216,0.75)"; ctx.lineWidth = 1.4 / k; ctx.stroke(hovered.path);
     }
     if (selected && visible.includes(selected)) {
@@ -589,7 +732,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     const boxes = [];
-    const cand = visible.filter(o => !o.rel && o.centroid && isFinite(o.centroid[0])).sort((a, b) => b.labelArea - a.labelArea);
+    const cand = (quiz ? (quiz.revealed && qt ? [qt] : []) : visible).filter(o => !o.rel && o.centroid && isFinite(o.centroid[0])).sort((a, b) => b.labelArea - a.labelArea);
     for (const o of cand) {
       const sx = o.centroid[0] * k + transform.x, sy = o.centroid[1] * k + transform.y;
       if (sx < -50 || sx > W + 50 || sy < -20 || sy > H + 20) continue;
@@ -606,7 +749,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     }
 
     // today's country names: small italic caps, fitted around the historical labels
-    if (showModern && modern && modern.labels) {
+    if (showModern && modern && modern.labels && !quiz) {
       const family = getComputedStyle(document.body).fontFamily;
       if ("letterSpacing" in ctx) ctx.letterSpacing = "1px";
       for (const l of modern.labels) {
@@ -625,6 +768,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
       }
       if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
     }
+    drawPins();
   }
 
   // ---------- sparkline ----------
@@ -677,10 +821,11 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
       if (selected) ensure(selected);
       renderInfo();
     }
+    if (spot && spot.bands) renderSpot();
     drawSpark();
     draw();
   }
-  slider.addEventListener("input", () => { pause(); setYear(+slider.value, +slider.value - year); writeHash(); });
+  slider.addEventListener("input", () => { pause(); tourHold(); setYear(+slider.value, +slider.value - year); writeHash(); });
 
   function nextChange(dir) {
     if (dir > 0) { const c = changes.find(c => c > year); return c ?? MAX_Y; }
@@ -714,6 +859,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   const playBtn = $("playBtn"), speedSel = $("speed");
   function play() {
     if (playing) return;
+    stopTour();
     if (year >= rangeTo || year < rangeFrom) setYear(rangeFrom, 1);
     playing = true; last = performance.now(); acc = 0;
     playBtn.textContent = "❚❚ Pause"; $("miniPlay").textContent = "❚❚"; $("miniPlay").setAttribute("aria-label", "Pause");
@@ -782,18 +928,47 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   }
   const tip = $("tip");
   let downAt = null;
-  canvas.addEventListener("pointerdown", (e) => { downAt = [e.clientX, e.clientY]; });
+  let lpTimer = null, lpFired = false, pointers = 0;
+  canvas.addEventListener("pointerdown", (e) => {
+    pointers++;
+    downAt = [e.clientX, e.clientY];
+    clearTimeout(lpTimer); lpTimer = null;
+    if (e.pointerType !== "mouse" && pointers === 1 && !quiz) {
+      // long-press on touch screens opens "Who ruled here?"
+      lpTimer = setTimeout(() => {
+        lpTimer = null; lpFired = true;
+        const ll = screenToLL(downAt[0], downAt[1]);
+        if (ll) openSpot(ll);
+      }, 550);
+    }
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (lpTimer && downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 8) { clearTimeout(lpTimer); lpTimer = null; }
+  });
+  const endPointer = () => { pointers = Math.max(0, pointers - 1); clearTimeout(lpTimer); lpTimer = null; };
+  canvas.addEventListener("pointercancel", () => { endPointer(); downAt = null; lpFired = false; });
   canvas.addEventListener("pointerup", (e) => {
+    endPointer();
+    if (lpFired) { lpFired = false; downAt = null; return; }
     if (!downAt) return;
     const moved = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]);
     downAt = null;
-    if (moved > 5) return;
+    if (moved > 5 || quiz) return;
+    const ll = screenToLL(e.clientX, e.clientY);
+    if (pickMode) { if (ll) openSpot(ll); return; }
+    lastClickLL = ll;
     selected = hitAt(e.clientX, e.clientY);
     renderInfo(); draw();
   });
+  canvas.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    if (quiz) return;
+    const ll = screenToLL(e.clientX, e.clientY);
+    if (ll) openSpot(ll);
+  });
   let hoverQueued = false, lastMove = null;
   canvas.addEventListener("pointermove", (e) => {
-    if (e.pointerType !== "mouse") return;
+    if (e.pointerType !== "mouse" || quiz) return;
     lastMove = e;
     if (hoverQueued) return; hoverQueued = true;
     requestAnimationFrame(() => {
@@ -811,7 +986,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 
   function renderInfo() {
     const box = $("info");
-    if (!selected) { box.classList.remove("show"); return; }
+    if (!selected) { box.classList.remove("show"); $("infoMore").innerHTML = ""; return; }
     const o = selected, s = spans.get(o.name), p = o.p;
     $("infoName").innerHTML = `<span class="swatch" style="background:${o.color}"></span>`;
     $("infoName").appendChild(document.createTextNode(o.label));
@@ -828,6 +1003,11 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     if (p.Wikipedia) add("https://en.wikipedia.org/wiki/" + encodeURIComponent(p.Wikipedia.replace(/ /g, "_")), "Wikipedia ↗");
     if (p.Wikidata) add("https://www.wikidata.org/wiki/" + encodeURIComponent(p.Wikidata), "Wikidata ↗");
     const zb = document.createElement("a"); zb.href = "#"; zb.textContent = "Zoom to"; zb.onclick = (e) => { e.preventDefault(); zoomTo(o); }; links.appendChild(zb);
+    if (lastClickLL) {
+      const sb = document.createElement("a"); sb.href = "#"; sb.textContent = "Who ruled this spot?";
+      const ll = lastClickLL; sb.onclick = (e) => { e.preventDefault(); openSpot(ll); }; links.appendChild(sb);
+    }
+    renderExtra(o);
     box.classList.add("show");
   }
   $("infoClose").onclick = () => { selected = null; renderInfo(); draw(); };
@@ -852,6 +1032,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     const s = spans.get(name);
     const row = s.rows.find(o => o.from <= year && year <= o.to) || s.rows.reduce((a, b) => (ensure(a).area >= ensure(b).area ? a : b));
     if (!(row.from <= year && year <= row.to)) setYear(row.from, 1);
+    lastClickLL = null; stopTour();
     selected = row; renderInfo(); zoomTo(row); writeHash();
   });
   $("searchInput").addEventListener("input", () => $("searchInput").setCustomValidity(""));
@@ -861,11 +1042,678 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 
   window.addEventListener("keydown", (e) => {
     if (document.querySelector("dialog[open]")) return;
+    if (quiz) { if (e.key === "Escape") exitQuiz(); return; }
+    if (e.key === "Escape") { if (pickMode) setPick(false); else if (spot) closeSpot(); else if (tour) stopTour(); else if (selected) { selected = null; renderInfo(); draw(); } return; }
     if (e.target.matches("input, select, textarea")) return;
+    if (e.code === "Space" && tour) { e.preventDefault(); tourToggle(); return; }
     if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
     else if (e.key === "ArrowRight") { e.preventDefault(); pause(); setYear(e.shiftKey ? nextChange(1) : year + 1, 1); writeHash(); }
     else if (e.key === "ArrowLeft") { e.preventDefault(); pause(); setYear(e.shiftKey ? nextChange(-1) : year - 1, -1); writeHash(); }
   });
+
+  // =====================================================================
+  // shared helpers for spot timeline, quiz, tours, rulers & events
+  // =====================================================================
+  const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const yrs = (a, b) => (a === b ? fmtS(a) : a < 0 && b < 0 ? `${-a}–${-b} BCE` : a > 0 && b > 0 ? `${a}–${b} CE` : `${fmtS(a)} – ${fmtS(b)}`);
+  const fmtLL = ([lon, lat]) => `${Math.abs(lat).toFixed(2)}° ${lat >= 0 ? "N" : "S"}, ${Math.abs(lon).toFixed(2)}° ${lon >= 0 ? "E" : "W"}`;
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  };
+  function track(name, params) { try { if (window.gtag) window.gtag("event", name, params || {}); } catch (e) {} }
+
+  function screenToLL(cx, cy) {
+    const bx = (cx - transform.x) / transform.k, by = (cy - transform.y) / transform.k;
+    const ll = projection.invert([bx, by]);
+    if (!ll || !isFinite(ll[0]) || !isFinite(ll[1])) return null;
+    const p = projection(ll);
+    if (!p || Math.hypot(p[0] - bx, p[1] - by) > 1) return null; // clicked off the globe
+    return ll;
+  }
+  function llToScreen(ll) {
+    const p = projection(ll);
+    return p ? [p[0] * transform.k + transform.x, p[1] * transform.k + transform.y] : null;
+  }
+  function viewCenterY(extraBottom) {
+    const dockH = (document.querySelector(".dock").offsetHeight || 0) + 24 + (extraBottom || 0);
+    return Math.max(140, (H - dockH) / 2 + 30);
+  }
+  function flyTo(ll, k, dur = 1200, cy) {
+    const p = projection(ll); if (!p) return;
+    const kk = Math.max(1, Math.min(40, k));
+    const t = d3.zoomIdentity.translate(W / 2, cy ?? viewCenterY()).scale(kk).translate(-p[0], -p[1]);
+    (reduceMotion() || !dur ? sel : sel.transition().duration(dur)).call(zoom.transform, t);
+  }
+
+  // pins: the spot you picked, plus the selected polity's capital and numbered events
+  function drawPins() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const family = getComputedStyle(document.body).fontFamily;
+    if (spot) {
+      const s = llToScreen(spot.ll);
+      if (s) {
+        ctx.beginPath(); ctx.arc(s[0], s[1], 11, 0, Math.PI * 2); ctx.fillStyle = "rgba(217,169,91,0.22)"; ctx.fill();
+        ctx.beginPath(); ctx.arc(s[0], s[1], 4.5, 0, Math.PI * 2); ctx.fillStyle = C.brass; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = "#0a1219"; ctx.stroke();
+      }
+    }
+    const tf = tourFocus();
+    if (tf && tf.centroid) {
+      const k = transform.k;
+      const c = [tf.centroid[0] * k + transform.x, tf.centroid[1] * k + transform.y];
+      const size = Math.sqrt(tf.area) * k;
+      ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * transform.x, dpr * transform.y);
+      ctx.strokeStyle = "rgba(10,18,25,0.9)"; ctx.lineWidth = 4.5 / k; ctx.stroke(tf.path);
+      ctx.strokeStyle = C.brass; ctx.lineWidth = 2.2 / k; ctx.stroke(tf.path);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (size < 22) { // too small to see: ring it
+        ctx.beginPath(); ctx.arc(c[0], c[1], 16, 0, Math.PI * 2);
+        ctx.lineWidth = 2.5; ctx.strokeStyle = C.brass; ctx.stroke();
+        ctx.font = `600 13px ${family}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.85)"; ctx.strokeText(tf.label, c[0] + 22, c[1]);
+        ctx.fillStyle = C.ink; ctx.fillText(tf.label, c[0] + 22, c[1]);
+      }
+    }
+    if (quiz || !selected) return;
+    const ex = extraResolved.get(extraKey(selected));
+    if (!ex) return;
+    ex.events.forEach((ev, i) => {
+      if (!ev.ll) return;
+      const s = llToScreen(ev.ll); if (!s || s[0] < -20 || s[0] > W + 20 || s[1] < -20 || s[1] > H + 20) return;
+      const near = ev.year != null && Math.abs(ev.year - year) <= 25;
+      ctx.beginPath(); ctx.arc(s[0], s[1], 8, 0, Math.PI * 2);
+      ctx.fillStyle = near ? C.brass : "rgba(233,228,216,0.85)"; ctx.fill();
+      ctx.lineWidth = 1.5; ctx.strokeStyle = "#0a1219"; ctx.stroke();
+      ctx.fillStyle = "#1b1408"; ctx.font = `700 9.5px ${family}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(i + 1), s[0], s[1] + 0.5);
+    });
+    const cap = currentCapital(ex);
+    if (cap && cap.ll) {
+      const s = llToScreen(cap.ll);
+      if (s) {
+        // a small brass star for the capital
+        ctx.beginPath();
+        for (let j = 0; j < 10; j++) { const r = j % 2 ? 3.2 : 7.5, a = -Math.PI / 2 + j * Math.PI / 5; ctx.lineTo(s[0] + r * Math.cos(a), s[1] + r * Math.sin(a)); }
+        ctx.closePath(); ctx.fillStyle = C.brass; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#0a1219"; ctx.stroke();
+        ctx.font = `600 12px ${family}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.8)"; ctx.strokeText(cap.name, s[0] + 10, s[1]);
+        ctx.fillStyle = C.ink; ctx.fillText(cap.name, s[0] + 10, s[1]);
+      }
+    }
+  }
+
+  // =====================================================================
+  // 1. Who ruled here?
+  // =====================================================================
+  let gbReady = false;
+  function prepGeoBounds() {
+    if (gbReady) return;
+    for (const o of feats) {
+      if (o.rel) continue;
+      if (!o.checked) { fixWinding(o.f); o.checked = true; }
+      o.gb = d3.geoBounds(o.f);
+    }
+    gbReady = true;
+  }
+  function inGB(gb, ll) {
+    const [[w, s], [e, n]] = gb;
+    if (ll[1] < s || ll[1] > n) return false;
+    return w <= e ? (ll[0] >= w && ll[0] <= e) : (ll[0] >= w || ll[0] <= e);
+  }
+  function whoRuled(ll) {
+    prepGeoBounds();
+    const byName = new Map();
+    for (const o of feats) {
+      if (o.rel || !inGB(o.gb, ll) || !d3.geoContains(o.f, ll)) continue;
+      if (!byName.has(o.label)) byName.set(o.label, []);
+      byName.get(o.label).push(o);
+    }
+    const bands = [];
+    for (const [name, rows] of byName) {
+      rows.sort((a, b) => a.from - b.from);
+      let cur = null;
+      for (const r of rows) {
+        if (cur && r.from <= cur.to + 1) { cur.to = Math.max(cur.to, r.to); cur.rows.push(r); }
+        else { cur = { name, label: r.label, color: r.color, from: r.from, to: r.to, rows: [r] }; bands.push(cur); }
+      }
+    }
+    bands.sort((a, b) => a.from - b.from || b.to - a.to);
+    const laneEnds = [];
+    for (const b of bands) {
+      let l = laneEnds.findIndex(e => e < b.from);
+      if (l < 0) { l = laneEnds.length; laneEnds.push(0); }
+      laneEnds[l] = b.to; b.lane = l;
+    }
+    return { bands, lanes: Math.max(1, laneEnds.length) };
+  }
+  function modernCountryAt(ll) {
+    if (!modern) return null;
+    const f = modern.feats.find(f => d3.geoContains(f, ll));
+    return f ? f.properties.name : null;
+  }
+  function setPick(on) {
+    pickMode = on;
+    $("pickSpot").setAttribute("aria-pressed", String(on));
+    const t = $("toast");
+    t.textContent = phone.matches ? "Tap a spot on the map" : "Click a spot on the map";
+    t.classList.toggle("show", on);
+    canvas.style.cursor = on ? "crosshair" : "";
+  }
+  $("pickSpot").onclick = () => { if (pickMode) setPick(false); else { closeSpot(); setPick(true); } };
+
+  function openSpot(ll) {
+    setPick(false);
+    spot = { ll, bands: null, today: null };
+    if (phone.matches) { selected = null; renderInfo(); }
+    if (!phone.matches) {
+      const top = Math.round(document.querySelector(".brand").getBoundingClientRect().bottom + 10);
+      $("spot").style.top = top + "px";
+      $("spot").style.maxHeight = `calc(100% - ${top + 8}px - var(--dockH, 200px))`;
+    } else { $("spot").style.top = ""; $("spot").style.maxHeight = ""; }
+    $("spot").classList.add("show");
+    $("spotTitle").textContent = fmtLL(ll);
+    $("spotSub").textContent = "Searching 5,400 years of borders…";
+    $("spotStrip").innerHTML = ""; $("spotList").innerHTML = "";
+    draw();
+    track("who_ruled_here");
+    setTimeout(() => {
+      if (!spot || spot.ll !== ll) return;
+      const r = whoRuled(ll);
+      spot.bands = r.bands; spot.lanes = r.lanes;
+      spot.today = modernCountryAt(ll);
+      renderSpot();
+      if (!modern) {
+        const p = loadModern();
+        if (p) p.then(() => { if (spot && spot.ll === ll) { spot.today = modernCountryAt(ll); renderSpot(); } });
+      }
+    }, 30);
+  }
+  function closeSpot() {
+    if (!spot) return;
+    spot = null; $("spot").classList.remove("show"); draw();
+  }
+  $("spotClose").onclick = closeSpot;
+
+  function renderSpot() {
+    if (!spot || !spot.bands) return;
+    const { bands, lanes } = spot, n = bands.length;
+    $("spotSub").textContent = (spot.today ? `Today: ${spot.today}. ` : "") +
+      (n ? `${n} ${n === 1 ? "power" : "powers"} held this spot.` : "No state is recorded at this spot in the dataset.");
+    const Wd = 1000, laneH = 16, Hh = lanes * laneH + 6;
+    const x = (y) => (y - MIN_Y) / (MAX_Y - MIN_Y) * Wd;
+    let svg = `<rect x="0" y="0" width="${Wd}" height="${Hh}" fill="rgba(233,228,216,0.06)"/>`;
+    svg += `<rect x="${x(1).toFixed(1)}" y="0" width="1.5" height="${Hh}" fill="rgba(233,228,216,0.25)"/>`;
+    for (const b of bands) {
+      svg += `<rect x="${x(b.from).toFixed(1)}" y="${3 + b.lane * laneH}" width="${Math.max(3, x(b.to + 1) - x(b.from)).toFixed(1)}" height="${laneH - 4}" fill="${b.color}"><title>${esc(b.label)}, ${esc(yrs(b.from, b.to))}</title></rect>`;
+    }
+    svg += `<rect x="${(x(year) - 2).toFixed(1)}" y="0" width="4" height="${Hh}" fill="${C.brass}"/>`;
+    const strip = $("spotStrip");
+    strip.setAttribute("viewBox", `0 0 ${Wd} ${Hh}`);
+    strip.style.height = (lanes * 11 + 6) + "px";
+    strip.innerHTML = svg;
+    const list = $("spotList"); list.innerHTML = "";
+    for (const b of bands) {
+      const li = document.createElement("li"), btn = document.createElement("button");
+      btn.type = "button";
+      if (b.from <= year && year <= b.to) btn.classList.add("now");
+      btn.innerHTML = `<span class="sw" style="background:${b.color}"></span><span>${esc(b.label)}</span><span class="yrs">${esc(yrs(b.from, b.to))}</span>`;
+      btn.onclick = () => {
+        pause(); tourHold();
+        const y = (b.from <= year && year <= b.to) ? year : b.from;
+        setYear(y, 1);
+        selected = b.rows.find(r => r.from <= y && y <= r.to) || null;
+        if (selected) ensure(selected);
+        lastClickLL = spot ? spot.ll : null;
+        renderInfo(); draw(); writeHash();
+      };
+      li.appendChild(btn); list.appendChild(li);
+    }
+  }
+  $("spotStrip").addEventListener("click", (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const y = Math.round(MIN_Y + (e.clientX - r.left) / r.width * (MAX_Y - MIN_Y));
+    pause(); tourHold(); setYear(y, 1); writeHash();
+  });
+
+  // =====================================================================
+  // 4. Summary, capital, rulers and key events (live from Wikipedia + Wikidata)
+  // =====================================================================
+  const extraCache = new Map();
+  const extraShowAll = new Set();
+  function extraKey(o) { return o ? (o.p.Wikipedia || o.p.Wikidata || null) : null; }
+  async function fetchJSON(url, ms = 9000) {
+    const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
+    try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
+    finally { clearTimeout(t); }
+  }
+  const yearOf = (v) => { const t = v && v.time; if (!t) return null; const m = /^([+-])(\d+)-/.exec(t); if (!m) return null; const y = parseInt(m[2], 10) * (m[1] === "-" ? -1 : 1); return y === 0 ? null : y; };
+  function claimList(ent, pid) {
+    return ((ent.claims || {})[pid] || [])
+      .filter(c => c.rank !== "deprecated" && c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.value && c.mainsnak.datavalue.value.id)
+      .map(c => ({
+        id: c.mainsnak.datavalue.value.id,
+        from: yearOf(c.qualifiers?.P580?.[0]?.datavalue?.value),
+        to: yearOf(c.qualifiers?.P582?.[0]?.datavalue?.value),
+        at: yearOf(c.qualifiers?.P585?.[0]?.datavalue?.value),
+      }));
+  }
+  async function wbEntities(ids, props) {
+    const out = {};
+    for (let i = 0; i < ids.length; i += 50) {
+      const chunk = ids.slice(i, i + 50);
+      const j = await fetchJSON(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${chunk.join("|")}&props=${props}&languages=en&format=json&origin=*`);
+      Object.assign(out, j.entities || {});
+    }
+    return out;
+  }
+  function loadExtra(o) {
+    const key = extraKey(o);
+    if (extraCache.has(key)) return extraCache.get(key);
+    const pr = (async () => {
+      let summary = null, qid = o.p.Wikidata || null;
+      if (o.p.Wikipedia) {
+        try {
+          summary = await fetchJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(o.p.Wikipedia.replace(/ /g, "_"))}?redirect=true`);
+          if (summary && summary.wikibase_item) qid = summary.wikibase_item; // the article's own Wikidata link is the most reliable
+        } catch (e) { summary = null; }
+      }
+      let rulers = [], capitals = [], events = [];
+      if (qid) {
+        const ent = (await wbEntities([qid], "claims"))[qid];
+        if (ent) {
+          rulers = claimList(ent, "P35"); capitals = claimList(ent, "P36"); events = claimList(ent, "P793");
+          const rulerInfo = await wbEntities([...new Set(rulers.map(r => r.id))], "labels");
+          const placeInfo = await wbEntities([...new Set([...capitals, ...events].map(r => r.id))], "labels|claims");
+          const lab = (info, id) => info[id]?.labels?.en?.value || null;
+          const coord = (id) => { const v = placeInfo[id]?.claims?.P625?.[0]?.mainsnak?.datavalue?.value; return v && isFinite(v.longitude) ? [v.longitude, v.latitude] : null; };
+          const when = (id) => { const c = placeInfo[id]?.claims || {}; return yearOf(c.P585?.[0]?.mainsnak?.datavalue?.value) ?? yearOf(c.P580?.[0]?.mainsnak?.datavalue?.value) ?? yearOf(c.P571?.[0]?.mainsnak?.datavalue?.value); };
+          const seen = new Set();
+          rulers = rulers.map(r => ({ ...r, name: lab(rulerInfo, r.id) })).filter(r => r.name && !seen.has(r.id + r.from) && seen.add(r.id + r.from))
+            .sort((a, b) => (a.from ?? 1e9) - (b.from ?? 1e9));
+          capitals = capitals.map(c => ({ ...c, name: lab(placeInfo, c.id), ll: coord(c.id) })).filter(c => c.name);
+          events = events.map(e => ({ ...e, name: lab(placeInfo, e.id), ll: coord(e.id), year: e.at ?? when(e.id) })).filter(e => e.name)
+            .sort((a, b) => (a.year ?? 1e9) - (b.year ?? 1e9));
+        }
+      }
+      let extract = summary && summary.type !== "disambiguation" ? (summary.extract || null) : null;
+      if (extract && extract.length > 340) {
+        const cut = extract.slice(0, 340), dot = cut.lastIndexOf(". ");
+        extract = (dot > 120 ? cut.slice(0, dot + 1) : cut.replace(/\s+\S*$/, "") + "…");
+      }
+      return { extract, page: summary?.content_urls?.desktop?.page || null, rulers, capitals, events };
+    })();
+    extraCache.set(key, pr);
+    pr.catch(() => extraCache.delete(key));
+    return pr;
+  }
+  function currentCapital(ex) {
+    if (!ex || !ex.capitals.length) return null;
+    const dated = ex.capitals.filter(c => c.from != null || c.to != null);
+    const now = dated.find(c => (c.from == null || c.from <= year) && (c.to == null || year <= c.to));
+    if (now) return now;
+    const undated = ex.capitals.filter(c => c.from == null && c.to == null);
+    return undated.length === 1 ? undated[0] : (dated.length ? null : undated[0] || null);
+  }
+  function rulerNowIndex(rs) {
+    let best = -1;
+    rs.forEach((r, i) => {
+      if (r.from == null) return;
+      const end = r.to ?? (rs[i + 1]?.from != null ? rs[i + 1].from - 1 : r.from + 40);
+      if (r.from <= year && year <= end) best = i;
+    });
+    return best;
+  }
+  function renderExtra(o) {
+    const box = $("infoMore"), key = extraKey(o);
+    if (!key) { box.innerHTML = ""; return; }
+    if (!extraResolved.has(key)) {
+      box.innerHTML = `<p class="muted">Loading summary, rulers and events…</p>`;
+      loadExtra(o).then(d => { extraResolved.set(key, d); }, () => { extraResolved.set(key, null); })
+        .then(() => { if (selected && extraKey(selected) === key) { renderExtra(selected); draw(); } });
+      return;
+    }
+    const ex = extraResolved.get(key);
+    if (!ex) {
+      box.innerHTML = `<p class="muted">Couldn't reach Wikipedia or Wikidata, so the summary, rulers and events aren't shown. <button type="button" class="linkbtn" id="extraRetry">Try again</button></p>`;
+      $("extraRetry").onclick = () => { extraResolved.delete(key); extraCache.delete(key); renderExtra(o); };
+      return;
+    }
+    let html = "";
+    if (ex.extract) html += `<p class="extract">${esc(ex.extract)}</p><div class="src">From Wikipedia</div>`;
+    const cap = currentCapital(ex);
+    if (cap) html += `<h4>Capital${cap.from != null ? " in " + esc(fmtS(year)) : ""}</h4><div>${esc(cap.name)}${cap.ll ? ' <span class="muted">(star on the map)</span>' : ""}</div>`;
+    const showAll = extraShowAll.has(key);
+    if (ex.rulers.length) {
+      const now = rulerNowIndex(ex.rulers);
+      let list = ex.rulers.map((r, i) => ({ r, i }));
+      if (!showAll && list.length > 8) {
+        const c = now >= 0 ? now : Math.max(0, ex.rulers.findIndex(r => r.from != null && r.from > year) - 1);
+        const a = Math.max(0, Math.min(list.length - 7, c - 3));
+        list = list.slice(a, a + 7);
+      }
+      html += `<h4>Rulers <span class="muted">(${ex.rulers.length})</span></h4><ol>` + list.map(({ r, i }) =>
+        `<li class="${i === now ? "cur" : ""}"><button type="button" data-ruler="${i}"><span></span><span>${esc(r.name)}${i === now ? ' <span class="muted">· in power</span>' : ""}</span><span class="yrs">${r.from != null ? esc(r.to != null ? yrs(r.from, r.to) : "from " + fmtS(r.from)) : ""}</span></button></li>`).join("") + `</ol>`;
+    }
+    if (ex.events.length) {
+      const evs = showAll ? ex.events : ex.events.slice(0, 10);
+      html += `<h4>Key events <span class="muted">(${ex.events.length})</span></h4><ol>` + evs.map((e) => {
+        const i = ex.events.indexOf(e);
+        return `<li><button type="button" data-event="${i}"><span class="num${e.ll ? "" : " off"}">${i + 1}</span><span>${esc(e.name)}</span><span class="yrs">${e.year != null ? esc(fmtS(e.year)) : ""}</span></button></li>`;
+      }).join("") + `</ol>`;
+    }
+    if ((ex.rulers.length > 8 || ex.events.length > 10)) html += `<div class="more"><button type="button" class="linkbtn" id="extraAll">${showAll ? "Show fewer" : "Show all rulers and events"}</button></div>`;
+    if (!ex.rulers.length && !ex.events.length && !cap) html += `<p class="muted" style="margin-top:8px">Wikidata lists no capital, rulers or events for this entry.</p>`;
+    box.innerHTML = html;
+    box.querySelectorAll("[data-ruler]").forEach(b => b.onclick = () => {
+      const r = ex.rulers[+b.dataset.ruler]; if (r.from == null) return;
+      pause(); tourHold(); setYear(Math.max(MIN_Y, Math.min(MAX_Y, r.from)), 1); writeHash();
+    });
+    box.querySelectorAll("[data-event]").forEach(b => b.onclick = () => {
+      const e = ex.events[+b.dataset.event];
+      pause(); tourHold();
+      if (e.year != null) { setYear(Math.max(MIN_Y, Math.min(MAX_Y, e.year)), 1); writeHash(); }
+      if (e.ll) flyTo(e.ll, Math.max(transform.k, 3.5));
+    });
+    const all = $("extraAll");
+    if (all) all.onclick = () => { showAll ? extraShowAll.delete(key) : extraShowAll.add(key); renderExtra(o); };
+  }
+
+  // =====================================================================
+  // 2. Daily quiz
+  // =====================================================================
+  const QUIZ_EPOCH = Date.UTC(2026, 10, 19); // quiz #1 is 19 Nov 2026
+  const dayStr = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const dayNumber = (ds) => { const [y, m, d] = ds.split("-").map(Number); return Math.floor((Date.UTC(y, m - 1, d) - QUIZ_EPOCH) / 864e5) + 1; };
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  // Well-known empires per era (names as they appear in Cliopatria), so answers are recognisable
+  const FAMOUS = [["Akkadian Empire", "Middle Kingdom of Egypt", "New Kingdom of Egypt", "Old Kingdom of Egypt", "Neo-Assyrian Empire", "Neo-Babylonian Empire", "Achaemenid Empire", "Kingdom of Kush", "Zhou Dynasty", "Shang Dynasty", "Indus Valley Civilization", "Median Kingdom", "Scythia", "Hittites", "Babylonia", "Assyria", "Lydia", "Elam", "Mycenaean Greece"], ["Achaemenid Empire", "Roman Republic", "Roman Empire", "Carthage", "Macedonian Empire", "Maurya Empire", "Gupta Empire", "Han Dynasty", "Qin Dynasty", "Parthian Empire", "Sasanian Empire", "Seleucid Empire", "Ptolemaic Kingdom", "Kushan Empire", "Hunnic Empire", "Xiongnu", "Western Roman Empire", "Eastern Roman Empire", "Kingdom of Armenia", "Goguryeo", "Satavahana Dynasty"], ["Byzantine Empire", "Umayyad Caliphate", "Abbasid Caliphate", "Rashidun Caliphate", "Tang Dynasty", "Sui Dynasty", "Northern Song", "Southern Song", "Holy Roman Empire", "Kingdom of the Franks", "Carolingian Empire", "Khmer Empire", "Tibetan Empire", "Fatimid Caliphate", "Great Seljuk Empire", "Kievan Rus'", "Chola Empire", "Göktürk Khaganate", "Khazaria", "Almohad Caliphate", "Ghaznavid Empire", "Liao Dynasty", "Ghana Empire", "Sasanian Empire", "Kingdom of England", "Kingdom of Hungary", "First Bulgarian Empire", "Uyghur Khaganate", "Caliphate of Córdoba"], ["Mongol Empire", "Golden Horde", "Ilkhanate", "Chagatai Khanate", "Yuan Dynasty", "Ottoman Empire", "Mughal Empire", "Ming Dynasty", "Qing Dynasty", "Inca Empire", "Mali Empire", "Songhai Empire", "Spanish Empire", "Portuguese Empire", "Russian Empire", "Tsardom of Russia", "Safavid Dynasty", "Polish-Lithuanian Commonwealth", "Holy Roman Empire", "Mamluk Sultanate", "Khmer Empire", "Majapahit", "Kingdom of France", "Grand Duchy of Lithuania", "Timurid Empire", "Kingdom of England", "Ethiopian Empire", "Dutch Republic", "Swedish Empire", "Aztec Triple Alliance"], ["British Empire", "British Raj", "Russian Empire", "Ottoman Empire", "Qing Dynasty", "German Empire", "Austria-Hungary", "Austrian Empire", "First French Empire", "Empire of Japan", "Empire of Brazil", "Gran Colombia", "Confederate States of America", "Ethiopian Empire", "Union of Soviet Socialist Republics", "United States of America", "Mughal Empire", "Kingdom of Great Britain", "Spanish Empire", "Portuguese Empire", "Kingdom of Prussia", "Kingdom of Italy", "Nazi Germany", "Republic of China", "People's Republic of China", "Belgian Congo", "Dutch East Indies", "Empire of China", "Mexico", "Durrani Empire", "Maratha Empire", "Sikh Empire", "Canada", "Commonwealth of Australia"]];
+  const FAMOUS_SET = new Set(FAMOUS.flat());
+  function buildRounds(ds) {
+    const rng = mulberry32(hash("whoruled:" + ds));
+    const pick = (arr) => arr[Math.floor(rng() * arr.length)];
+    const eras = [[-3000, -501], [-500, 500], [501, 1200], [1201, 1750], [1751, 2020]];
+    const used = new Set(), rounds = [];
+    eras.forEach(([a, b], ei) => {
+      const names = FAMOUS[ei].filter(n => !used.has(n) && spans.has(n) && spans.get(n).rows.some(r => r.to >= a && r.from <= b && (r.p.Area || 0) >= 80000));
+      if (!names.length) return;
+      const name = pick(names); used.add(name);
+      const o = pick(spans.get(name).rows.filter(r => r.to >= a && r.from <= b && (r.p.Area || 0) >= 80000));
+      const lo = Math.max(a, o.from), hi = Math.min(b, o.to);
+      let y = lo + Math.floor(rng() * (hi - lo + 1)); if (y === 0) y = 1;
+      const active = feats.filter(r => !r.rel && r.from <= y && y <= r.to && r.label !== o.label && !/minor states|unclaimed/i.test(r.name));
+      const famousNow = [...new Set(active.filter(r => FAMOUS_SET.has(r.name)).map(r => r.label))];
+      const bigNow = [...new Set(active.filter(r => !FAMOUS_SET.has(r.name) && r.p.Wikipedia && (r.p.Area || 0) >= 300000).sort((p, q) => q.p.Area - p.p.Area).map(r => r.label))].slice(0, 8);
+      const eraFamous = FAMOUS[ei].filter(n => n !== o.label);
+      const opts = [];
+      for (const pool of [famousNow, bigNow, eraFamous]) {
+        const pl = pool.filter(n => !opts.includes(n) && n !== o.label);
+        while (opts.length < 3 && pl.length) opts.push(pl.splice(Math.floor(rng() * pl.length), 1)[0]);
+      }
+      const options = [o.label, ...opts];
+      for (let i = options.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [options[i], options[j]] = [options[j], options[i]]; }
+      rounds.push({ row: o, year: y, options, answer: o.label });
+    });
+    return rounds;
+  }
+  function tourFocus() {
+    if (!tour || tour.i < 0) return null;
+    const f = tour.t.steps[tour.i].f; if (!f || !spans.has(f)) return null;
+    const row = spans.get(f).rows.find(r => r.from <= year && year <= r.to);
+    return row ? ensure(row) : null;
+  }
+  function quizTarget() { return quiz && !quiz.done ? quiz.rounds[quiz.i]?.row || null : null; }
+  function quizStreak() {
+    let n = 0; const d = new Date();
+    const today = store.get("wre-quiz-" + dayStr(d));
+    if (!(today && today.answers && today.answers.length >= today.total)) d.setDate(d.getDate() - 1);
+    for (let guard = 0; guard < 4000; guard++) {
+      const v = store.get("wre-quiz-" + dayStr(d));
+      if (v && v.answers && v.answers.length >= v.total) { n++; d.setDate(d.getDate() - 1); } else break;
+    }
+    return n;
+  }
+  let quizClock = null;
+  function startQuiz() {
+    stopTour(); closeSpot(); setPick(false); pause();
+    if (document.querySelector("dialog[open]")) document.querySelectorAll("dialog[open]").forEach(d => d.close());
+    const ds = dayStr(), rounds = buildRounds(ds);
+    if (!rounds.length) return;
+    const saved = store.get("wre-quiz-" + ds);
+    quiz = { ds, n: dayNumber(ds), rounds, i: 0, answers: (saved && saved.answers) || [], prevYear: year, prevT: transform, done: false, revealed: false };
+    selected = null; hovered = null; renderInfo();
+    document.body.classList.add("quiz-mode");
+    $("quiz").classList.add("show");
+    track("quiz_start", { quiz_day: quiz.n });
+    if (quiz.answers.length >= rounds.length) { quiz.done = true; renderQuizResults(); draw(); }
+    else { quiz.i = quiz.answers.length; showRound(); }
+  }
+  function zoomQuiz(o) {
+    ensure(o);
+    const [[a, b], [c, d]] = o.bounds;
+    const panelH = $("quiz").offsetHeight + 24;
+    const availH = Math.max(160, H - panelH);
+    const k = Math.max(1, Math.min(7, 0.42 / Math.max((c - a) / W, (d - b) / availH)));
+    const t = d3.zoomIdentity.translate(W / 2, Math.max(90, availH / 2)).scale(k).translate(-(a + c) / 2, -(b + d) / 2);
+    (reduceMotion() ? sel : sel.transition().duration(900)).call(zoom.transform, t);
+  }
+  function showRound() {
+    const r = quiz.rounds[quiz.i];
+    quiz.revealed = false;
+    setYear(r.year, 1);
+    const box = $("quiz"), total = quiz.rounds.length;
+    const dots = quiz.rounds.map((_, i) => `<span class="${i < quiz.answers.length ? (quiz.answers[i] ? "ok" : "no") : i === quiz.i ? "cur" : ""}"></span>`).join("");
+    box.innerHTML = `
+      <button type="button" class="x" id="quizExit" aria-label="Leave the quiz">×</button>
+      <div class="kicker">Daily quiz #${quiz.n} · Round ${quiz.i + 1} of ${total}</div>
+      <h2>Who ruled the highlighted land in <span class="yr">${esc(fmtS(r.year))}</span>?</h2>
+      <div class="qopts">${r.options.map((op, i) => `<button type="button" data-opt="${i}">${esc(op)}</button>`).join("")}</div>
+      <div class="qfeedback" id="qfb">Pan or zoom the map if you need a better look.</div>
+      <div class="qfoot"><div class="qdots" aria-label="Progress">${dots}</div><button type="button" class="primary" id="qnext" hidden>${quiz.i + 1 < total ? "Next round ›" : "See my score ›"}</button></div>`;
+    $("quizExit").onclick = () => exitQuiz();
+    box.querySelectorAll("[data-opt]").forEach(b => b.onclick = () => answerQuiz(r.options[+b.dataset.opt], b));
+    $("qnext").onclick = () => { if (quiz.i + 1 < total) { quiz.i++; showRound(); } else { quiz.done = true; renderQuizResults(); draw(); } };
+    zoomQuiz(r.row);
+    draw();
+  }
+  function answerQuiz(opt, btn) {
+    if (!quiz || quiz.answers.length > quiz.i) return;
+    const r = quiz.rounds[quiz.i], ok = opt === r.answer, s = spans.get(r.row.name);
+    quiz.answers.push(ok); quiz.revealed = true;
+    store.set("wre-quiz-" + quiz.ds, { answers: quiz.answers, total: quiz.rounds.length });
+    $("quiz").querySelectorAll("[data-opt]").forEach(b => {
+      b.disabled = true;
+      if (r.options[+b.dataset.opt] === r.answer) b.classList.add("right");
+    });
+    if (!ok) btn.classList.add("wrong");
+    $("qfb").innerHTML = `${ok ? "<b>Correct!</b>" : "<b>Not quite.</b>"} It was the <b>${esc(r.answer)}</b>, which lasted ${esc(yrs(s.from, s.to))}.`;
+    const dots = $("quiz").querySelectorAll(".qdots span");
+    if (dots[quiz.i]) { dots[quiz.i].className = ok ? "ok" : "no"; }
+    $("qnext").hidden = false; $("qnext").focus();
+    draw();
+  }
+  function quizShareText() {
+    const score = quiz.answers.filter(Boolean).length;
+    return `Who ruled Earth? Daily #${quiz.n}\n${quiz.answers.map(a => a ? "🟩" : "🟥").join("")} ${score}/${quiz.rounds.length}\nhttps://whoruled.earth`;
+  }
+  function renderQuizResults() {
+    const score = quiz.answers.filter(Boolean).length, total = quiz.rounds.length;
+    const streak = quizStreak();
+    const msg = score === total ? "A flawless reign." : score >= total - 1 ? "A strong dynasty." : score >= 2 ? "A respectable principality." : "Even empires have bad days.";
+    if (!quiz.tracked) { track("quiz_complete", { quiz_day: quiz.n, score }); quiz.tracked = true; }
+    const box = $("quiz");
+    box.innerHTML = `
+      <button type="button" class="x" id="quizExit" aria-label="Leave the quiz">×</button>
+      <div class="kicker">Daily quiz #${quiz.n} · Results</div>
+      <h2>You got ${score} of ${total}. ${esc(msg)}</h2>
+      <div class="qgrid" aria-label="${score} correct out of ${total}">${quiz.answers.map(a => a ? "🟩" : "🟥").join("")}</div>
+      <div class="qstats"><div><b>${streak}</b>day streak</div><div><b id="qclock">–</b>until the next quiz</div></div>
+      <ol class="qreview">${quiz.rounds.map((r, i) => `<li><button type="button" data-review="${i}"><span>${quiz.answers[i] ? "✓" : "✗"}</span><span class="yrs">${esc(fmtS(r.year))}</span><span>${esc(r.answer)}</span></button></li>`).join("")}</ol>
+      <div class="qfoot"><button type="button" id="qexplore">Back to the map</button><button type="button" class="primary" id="qshare">Share my score</button></div>
+      <div id="qcopywrap"></div>`;
+    $("quizExit").onclick = () => exitQuiz();
+    $("qexplore").onclick = () => exitQuiz();
+    $("qshare").onclick = async (e) => {
+      const btn = e.currentTarget, text = quizShareText();
+      try { if (navigator.share && phone.matches) { await navigator.share({ text }); return; } } catch (err) { if (err && err.name === "AbortError") return; }
+      try { await navigator.clipboard.writeText(text); btn.textContent = "Copied to clipboard"; track("quiz_share"); }
+      catch (err) { $("qcopywrap").innerHTML = `<textarea class="qcopy" rows="3" readonly aria-label="Your score to copy">${esc(text)}</textarea>`; $("qcopywrap").querySelector("textarea").select(); btn.textContent = "Copy the text below"; }
+    };
+    box.querySelectorAll("[data-review]").forEach(b => b.onclick = () => {
+      const r = quiz.rounds[+b.dataset.review];
+      exitQuiz(true);
+      setYear(r.year, 1); selected = r.row; ensure(r.row); lastClickLL = null; renderInfo(); zoomTo(r.row); writeHash();
+    });
+    const tickClock = () => {
+      const el = $("qclock"); if (!el) return;
+      const now = new Date(), next = new Date(now); next.setHours(24, 0, 0, 0);
+      const s = Math.max(0, Math.round((next - now) / 1000));
+      el.textContent = `${Math.floor(s / 3600)}h ${String(Math.floor(s % 3600 / 60)).padStart(2, "0")}m`;
+    };
+    clearInterval(quizClock); tickClock(); quizClock = setInterval(tickClock, 15000);
+  }
+  function exitQuiz(keepView) {
+    if (!quiz) return;
+    const prev = quiz; quiz = null;
+    clearInterval(quizClock);
+    document.body.classList.remove("quiz-mode");
+    $("quiz").classList.remove("show"); $("quiz").innerHTML = "";
+    if (!keepView) { setYear(prev.prevYear, 1); sel.call(zoom.transform, prev.prevT); }
+    resize(); computeVisible(); draw();
+  }
+  $("openQuiz").onclick = startQuiz;
+
+  // =====================================================================
+  // 3. Guided tours
+  // =====================================================================
+  const TOURS = [
+    { title: "Rome: from city to empire", blurb: "A small republic on the Tiber grows to rule the Mediterranean, then splits and falls.", span: "500 BCE – 1453 CE", steps: [
+      { y: -500, c: [12.5, 42], k: 8, f: "Roman Republic", t: "Around 500 BCE, Rome is a young republic that controls little more than the city itself (circled), surrounded by Etruscan, Latin and Greek neighbours." },
+      { y: -264, c: [13.5, 40.5], k: 6, f: "Roman Republic", t: "By 264 BCE Rome controls most of the Italian peninsula. That year its first war with Carthage begins, over Sicily." },
+      { y: -133, c: [16, 38], k: 3, f: "Roman Republic", t: "Victory over Carthage and the Greek kingdoms of the east leaves Rome the dominant power around the Mediterranean." },
+      { y: -27, c: [16, 39], k: 2.8, f: "Roman Empire", t: "In 27 BCE Augustus becomes Rome's first emperor. The Republic gives way to the Roman Empire." },
+      { y: 117, c: [17, 41], k: 2.4, f: "Roman Empire", t: "Under the emperor Trajan, in 117 CE, the empire reaches its greatest extent: from Britain to Mesopotamia." },
+      { y: 395, c: [17, 41], k: 2.4, t: "In 395 the empire is permanently divided into a western half, ruled from Italy, and an eastern half ruled from Constantinople." },
+      { y: 476, c: [17, 41], k: 2.4, f: "Eastern Roman Empire", t: "In 476 the last emperor in the west is deposed. The eastern half, later called the Byzantine Empire, carries on." },
+      { y: 1453, c: [28.9, 41], k: 5, t: "In 1453 the Ottomans capture Constantinople, ending the eastern Roman Empire nearly 1,500 years after Augustus." },
+    ] },
+    { title: "Alexander the Great", blurb: "In barely a decade, one Macedonian king conquers the Persian Empire and reaches India.", span: "336–301 BCE", steps: [
+      { y: -336, c: [24, 39], k: 3.2, f: "Macedonian Empire", t: "In 336 BCE Alexander becomes king of Macedon, aged 20, inheriting a strong army from his father Philip II." },
+      { y: -333, c: [34, 37], k: 2.6, f: "Macedonian Empire", t: "He crosses into Asia in 334 BCE and defeats the Persian king Darius III at Issus in 333 BCE." },
+      { y: -331, c: [40, 33], k: 2.3, f: "Macedonian Empire", t: "After taking Egypt, he wins again at Gaugamela in 331 BCE, and the Persian Achaemenid Empire collapses." },
+      { y: -326, c: [55, 32], k: 2, f: "Macedonian Empire", t: "By 326 BCE his army reaches the Indus valley, where his exhausted soldiers refuse to go further." },
+      { y: -323, c: [44.4, 32.5], k: 2.3, f: "Macedonian Empire", t: "Alexander dies in Babylon in 323 BCE, aged 32. His generals soon start fighting over the empire." },
+      { y: -301, c: [40, 33], k: 2, t: "By 301 BCE it has broken into rival kingdoms, including the Ptolemies in Egypt and the Seleucids in Asia." },
+    ] },
+    { title: "The Mongol explosion", blurb: "Steppe tribes unite and build the largest contiguous land empire the world has seen.", span: "1200–1368 CE", steps: [
+      { y: 1200, c: [100, 45], k: 2.2, t: "In 1200 the Mongol tribes are divided. A chief named Temüjin is fighting his way to leadership on the steppe." },
+      { y: 1206, c: [100, 45], k: 2.2, f: "Mongol Empire", t: "In 1206 an assembly of Mongol chiefs proclaims Temüjin as Genghis Khan, ruler of a united Mongol nation." },
+      { y: 1227, c: [80, 42], k: 1.7, f: "Mongol Empire", t: "By Genghis Khan's death in 1227, his armies have destroyed the Khwarazmian Empire in Central Asia and are finishing off the Western Xia." },
+      { y: 1241, c: [70, 47], k: 1.5, f: "Mongol Empire", t: "By 1241 the Mongols have conquered the Rus' principalities and raided deep into Poland and Hungary." },
+      { y: 1279, c: [80, 42], k: 1.5, f: "Mongol Empire", t: "In 1279 Kublai Khan completes the conquest of Song China, bringing Mongol rule to its greatest extent, though in practice the empire is already splitting into separate khanates." },
+      { y: 1368, c: [105, 38], k: 2, f: "Ming Dynasty", t: "In 1368 the Ming dynasty drives the Yuan out of China, ending Mongol rule there." },
+    ] },
+    { title: "The scramble for Africa", blurb: "In a few decades, European powers carve up a continent; in a few more, it wins its independence.", span: "1870–1990", steps: [
+      { y: 1870, c: [18, 2], k: 1.9, t: "In 1870, European colonies in Africa are mostly coastal outposts, plus French Algeria and the far south." },
+      { y: 1885, c: [18, 2], k: 1.9, t: "At the Berlin Conference of 1884–85, European powers agree rules for claiming African territory." },
+      { y: 1900, c: [18, 2], k: 1.9, t: "By 1900 most of the continent has been divided among Britain, France, Germany, Belgium, Portugal, Italy and Spain." },
+      { y: 1914, c: [18, 2], k: 1.9, t: "By 1914 only Ethiopia and Liberia remain independent." },
+      { y: 1960, c: [18, 2], k: 1.9, t: "1960 is called the Year of Africa: seventeen African countries gain independence." },
+      { y: 1990, c: [18, 2], k: 1.9, t: "With Namibia's independence in 1990, colonial rule on the African mainland has essentially ended." },
+    ] },
+    { title: "World War I redraws Europe", blurb: "Four empires enter the war; none survive it in the same form.", span: "1914–1923", steps: [
+      { y: 1914, c: [22, 48], k: 3, t: "In 1914, four empires hold much of Europe and the Middle East: the German, Austro-Hungarian, Russian and Ottoman." },
+      { y: 1917, c: [30, 52], k: 2.4, t: "In 1917 revolution topples the Russian tsar, and Russia soon leaves the war." },
+      { y: 1919, c: [20, 50], k: 3.2, t: "After the war, new states appear in central and eastern Europe, including Poland, Czechoslovakia and Yugoslavia." },
+      { y: 1923, c: [32, 42], k: 2.6, t: "In 1923 the Republic of Turkey is founded from the core of the Ottoman Empire, and the Soviet Union, formed at the end of 1922, covers most of the old Russian Empire." },
+    ] },
+  ];
+  // tour list in the dialog
+  $("tourList").innerHTML = TOURS.map((t, i) => `
+    <div class="tour-item"><h3>${esc(t.title)} <span class="muted" style="font-family:var(--font-body);font-size:12px;font-weight:500">${esc(t.span)} · ${t.steps.length} stops</span></h3>
+    <p>${esc(t.blurb)}</p><button type="button" class="primary" data-tour="${i}">Start</button></div>`).join("");
+  $("tourList").querySelectorAll("[data-tour]").forEach(b => b.onclick = () => { $("dlg-tours").close(); startTour(+b.dataset.tour); });
+
+  let tourAnim = 0;
+  const REF_SCALE = d3.geoNaturalEarth1().fitExtent([[12, 12], [1388, 640]], { type: "Sphere" }).scale();
+  function tourK(k) {
+    const availH = Math.max(200, H - (document.querySelector(".dock").offsetHeight + 24) - (phone.matches ? $("tourCard").offsetHeight : 0));
+    const sizeRatio = Math.pow((W * availH) / (1400 * 650), 0.25);
+    return Math.max(1, k * sizeRatio * REF_SCALE / projection.scale());
+  }
+  function startTour(i) {
+    exitQuiz(true); closeSpot(); setPick(false); pause();
+    selected = null; renderInfo();
+    tour = { t: TOURS[i], i: -1, playing: true, timer: null };
+    $("tourCard").classList.add("show");
+    track("tour_start", { tour: TOURS[i].title });
+    goStep(0);
+  }
+  function stopTour() {
+    if (!tour) return;
+    clearTimeout(tour.timer); cancelAnimationFrame(tourAnim);
+    tour = null; $("tourCard").classList.remove("show"); writeHash();
+  }
+  function tourHold() { if (tour && tour.playing) tourToggle(); }
+  function tourToggle() {
+    if (!tour) return;
+    tour.playing = !tour.playing;
+    $("tourPlay").textContent = tour.playing ? "❚❚ Pause" : "▶ Resume";
+    clearTimeout(tour.timer);
+    if (tour.playing && !tour.animating) scheduleNext();
+  }
+  function scheduleNext() {
+    const s = tour.t.steps[tour.i];
+    const ms = Math.max(5500, s.t.split(/\s+/).length * 260);
+    clearTimeout(tour.timer);
+    tour.timer = setTimeout(() => {
+      if (!tour || !tour.playing) return;
+      if (tour.i + 1 < tour.t.steps.length) goStep(tour.i + 1);
+      else { tour.playing = false; $("tourPlay").textContent = "↺ Replay"; $("tourPlay").dataset.replay = "1"; }
+    }, ms);
+  }
+  function animYear(to, dur, done) {
+    cancelAnimationFrame(tourAnim);
+    const from = year, t0 = performance.now();
+    if (reduceMotion() || from === to || dur <= 0) { setYear(to, 1); done && done(); return; }
+    const stepf = (ts) => {
+      const f = Math.min(1, (ts - t0) / dur), e = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+      let y = Math.round(from + (to - from) * e);
+      if (y !== year) setYear(y, to > from ? 1 : -1);
+      if (f < 1) tourAnim = requestAnimationFrame(stepf); else { setYear(to, 1); done && done(); }
+    };
+    tourAnim = requestAnimationFrame(stepf);
+  }
+  function goStep(i) {
+    if (!tour) return;
+    clearTimeout(tour.timer);
+    const n = tour.t.steps.length, s = tour.t.steps[i], first = tour.i < 0;
+    tour.i = i;
+    delete $("tourPlay").dataset.replay;
+    $("tourKicker").textContent = `Tour · ${tour.t.title} · ${i + 1} of ${n}`;
+    const [num, era] = fmt(s.y);
+    $("tourYear").innerHTML = `${num}<small>${era}</small>`;
+    $("tourText").textContent = s.t;
+    $("tourBar").style.width = ((i + 1) / n * 100) + "%";
+    $("tourPrev").disabled = i === 0;
+    $("tourNext").textContent = i + 1 < n ? "Next ›" : "Finish";
+    $("tourPlay").textContent = tour.playing ? "❚❚ Pause" : "▶ Resume";
+    const cardH = $("tourCard").offsetHeight;
+    flyTo(s.c, tourK(s.k), first ? 900 : 1400, viewCenterY(phone.matches ? cardH : 0));
+    tour.animating = true;
+    const dur = first ? 0 : Math.max(700, Math.min(3500, Math.abs(s.y - year) * 6));
+    animYear(s.y, dur, () => { if (!tour) return; tour.animating = false; writeHash(); if (tour.playing) scheduleNext(); });
+  }
+  $("tourPrev").onclick = () => { if (tour && tour.i > 0) goStep(tour.i - 1); };
+  $("tourNext").onclick = () => { if (!tour) return; if (tour.i + 1 < tour.t.steps.length) goStep(tour.i + 1); else stopTour(); };
+  $("tourPlay").onclick = () => {
+    if (!tour) return;
+    if ($("tourPlay").dataset.replay) { tour.playing = true; goStep(0); return; }
+    tourToggle();
+  };
+  $("tourExit").onclick = stopTour;
+
 
   // ---------- shareable year via #y117 / #y-500 ----------
   function writeHash() { try { history.replaceState(null, "", "#y" + year); } catch (e) {} }

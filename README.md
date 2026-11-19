@@ -13,6 +13,10 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - Search for a polity to jump to its time and zoom to it
 - Optional dashed outlines for alliances and overlordships
 - "Today's borders" toggle: overlays modern country outlines and names on any year
+- **Who ruled here?** Right-click (or long-press, or use the button) on any spot to see every power that held it from 3400 BCE to today, as a timeline and a clickable list
+- **Daily quiz:** five rounds a day (one per era), same questions for everyone that day, with a streak counter and a shareable score grid. Results stay in the visitor's browser
+- **Guided tours:** captioned stories that move the map and the timeline (Rome, Alexander, the Mongols, the scramble for Africa, World War I)
+- **Rulers and events:** the details card loads a Wikipedia summary plus capital, rulers and key events from Wikidata, live in the visitor's browser, with the capital and numbered event pins on the map
 - Shareable year links: `#y117`, `#y-500`
 - Keyboard: Space plays or pauses, ←/→ steps one year, Shift+←/→ jumps to the previous or next change
 
