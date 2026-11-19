@@ -23,10 +23,12 @@ CLASSES = {
 KEEP = 2600
 
 QUERY = """
-SELECT ?e ?eLabel ?date ?coord ?pcoord ?sl ?article WHERE {
+SELECT ?e ?eLabel ?pit ?start ?coord ?pcoord ?sl ?article WHERE {
   ?e wdt:P31 wd:%(cls)s ; wikibase:sitelinks ?sl .
   FILTER(?sl >= %(min)d)
-  { ?e wdt:P585 ?date } UNION { ?e wdt:P580 ?date }
+  OPTIONAL { ?e wdt:P585 ?pit }
+  OPTIONAL { ?e wdt:P580 ?start }
+  FILTER(BOUND(?pit) || BOUND(?start))
   OPTIONAL { ?e wdt:P625 ?coord }
   OPTIONAL { ?e wdt:P276|wdt:P1071 ?place . ?place wdt:P625 ?pcoord }
   OPTIONAL { ?article schema:about ?e ; schema:isPartOf <https://en.wikipedia.org/> }
@@ -63,6 +65,7 @@ def year_of(dt):
     return y if y != 0 else -1
 
 events = {}
+cur_kind = {}
 for cat, classes in CLASSES.items():
     for cls, mn in classes:
         rows = run(QUERY % {"cls": cls, "min": mn})
@@ -75,8 +78,10 @@ for cat, classes in CLASSES.items():
             ll = point(b.get("coord", {}).get("value", "")) or point(b.get("pcoord", {}).get("value", ""))
             if not ll:
                 continue
+            # prefer the event's "point in time"; fall back to its start date
+            when, kind = (b["pit"]["value"], 0) if "pit" in b else (b["start"]["value"], 1)
             try:
-                y = year_of(b["date"]["value"])
+                y = year_of(when)
             except Exception:
                 continue
             if y < -3400 or y > 2025:
@@ -85,8 +90,11 @@ for cat, classes in CLASSES.items():
             wiki = urllib.parse.unquote(art.rsplit("/wiki/", 1)[-1]).replace("_", " ") if art else ""
             sl = int(b["sl"]["value"])
             cur = events.get(qid)
-            if cur is None or y < cur[0]:  # keep the earliest date if an item has several
-                events[qid] = [y, ll[0], ll[1], cat, label, wiki, sl, qid]
+            row = [y, ll[0], ll[1], cat, label, wiki, sl, qid]
+            # keep a point-in-time date over a start date; among equals keep the earliest
+            if cur is None or (kind, y) < (cur_kind.get(qid, 1), cur[0]):
+                events[qid] = row
+                cur_kind[qid] = kind
         time.sleep(2)
 
 rows = sorted(events.values(), key=lambda r: -r[6])[:KEEP]
