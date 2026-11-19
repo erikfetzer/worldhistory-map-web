@@ -21,6 +21,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - **Share and record:** links keep the year, the view, the selected polity and the compare year (`#y1250x80p09l47p09z2p98sMongol-Empire`); **Record clip** turns the play range into an MP4 or WebM video with the year burned in, ready to download or share
 - **Cities:** about 1,700 historical cities appear and grow with the year (3700 BCE to today); more appear as you zoom in. Period names for well-known renamings (Byzantium → Constantinople → Istanbul, Edo, Leningrad…). Hover for a population estimate; click a city to see who ruled it
 - **Events:** about 230 hand-picked headline events plus ~1,800 famous battles, treaties, revolutions, expeditions and disasters from Wikidata. Pins (a shape and colour per type) fade in and out around their year, more appear as you zoom, a ticker names events as playback passes them, and each opens a card with the story. Filter by type
+- **Native lands:** a "Native lands (US cessions)" toggle shows the 700+ tracts the United States acquired from Native nations between 1784 and 1894 (Royce's maps, digitized by the USDA Forest Service), each fading out at its treaty date, with tribe names, present-day nations and links to the treaty texts. Today's reservations, trust lands and First Nations reserves appear with "Today's borders"
 - **Rulers and events:** the details card loads a Wikipedia summary plus capital, rulers and key events from Wikidata, live in the visitor's browser, with the capital and numbered event pins on the map
 - Shareable links (old `#y117` / `#y-500` links still work)
 - Keyboard: Space plays or pauses, ←/→ steps one year, Shift+←/→ jumps to the previous or next change
@@ -38,6 +39,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 | `events.json` | Hand-picked headline events (written in `data-src/events-curated.py`) |
 | `events-wikidata.json` | Famous events from Wikidata, refreshed monthly by `.github/workflows/events.yml` running `scripts/build-events-wikidata.py` |
 | `admin1.json` | US states and Canadian provinces (Natural Earth 1:50m, public domain), part of the "Today's borders" overlay |
+| `indigenous.json` | US land cessions 1784–1894 (USDA Forest Service, CC BY), US reservations and trust lands (US Census, public domain), Canadian reserves and settlement lands (NRCan, OGL-Canada). Built quarterly by `.github/workflows/indigenous.yml` running `scripts/build-indigenous.py` |
 | `cities.json` | Merged historical city populations (built by `scripts/build-cities.py` from `data-src/cities/`) |
 | `scripts/build-data.sh` | Rebuilds `borders.json` and `land.json` from the sources |
 

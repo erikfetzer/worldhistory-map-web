@@ -95,6 +95,7 @@ select option { background: #16222d; }
 .controls input[type="number"] { width: 78px; font-variant-numeric: tabular-nums; }
 .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
 .city-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f3efe6; box-shadow: 0 0 0 1.5px #0a1219; }
+.land-swatch { display: inline-block; width: 14px; height: 10px; border: 1px solid #e3b36b; background: repeating-linear-gradient(135deg, rgba(227,179,107,0.85) 0 1.5px, transparent 1.5px 4px); }
 .dash-swatch { display: inline-block; width: 18px; height: 0; border-top: 1.5px dashed rgba(240,236,226,0.8); }
 .check { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; }
 .credit { grid-column: 1 / -1; text-align: center; line-height: 1.6; font-size: 11px; color: var(--muted); }
@@ -476,6 +477,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     </ul>
     <h3>Cities are estimates</h3>
     <p>City populations are historians' estimates, often rough and sometimes centuries apart. A city appears only around years with an estimate, so a missing city may simply lack data. Names follow the period for well-known renamings (Constantinople, Edo, Leningrad); otherwise the modern name is used.</p>
+    <h3>Native lands</h3>
+    <p>The hatched areas show land the United States acquired from Native nations by treaty, act of Congress or executive order between 1784 and 1894, as mapped by Charles C. Royce in 1899 and digitized by the USDA Forest Service. Each area disappears at the date of its cession. They show the US government's record, not each nation's own understanding of its homeland: many cessions were made under pressure or force, territories often overlapped, and land outside the shaded areas was not empty. Before 1784 and outside the United States, these lands were home to Native nations for thousands of years. Today's reservations and trust lands (US Census Bureau) and First Nations reserves and settlement lands (Natural Resources Canada) appear in green with Today's borders.</p>
     <h3>Events</h3>
     <p>About 230 headline events were chosen and written for this site. Thousands more come from Wikidata, picked by how many language editions of Wikipedia cover them. That favours well-documented events, so some regions and eras are better covered than others. Locations are where an event happened or where a treaty was signed; ancient dates are often approximate.</p>
     <h3>Not a statement on any dispute</h3>
@@ -516,6 +519,13 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     <ul>
       <li>About 230 headline events, hand-picked and written for this site, each linked to its Wikipedia article.</li>
       <li><a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>: famous battles, sieges, treaties, revolutions, expeditions and disasters with a date and a place, ranked by how many Wikipedia language editions cover them. Refreshed monthly.</li>
+    </ul>
+    <h3>Native lands</h3>
+    <ul>
+      <li><a href="https://catalog.data.gov/dataset/tribal-lands-ceded-to-the-united-states-feature-layer" target="_blank" rel="noopener">Tribal Lands Ceded to the United States</a>: 752 tracts from Charles C. Royce's <em>Indian Land Cessions in the United States</em> (1899), digitized by the USDA Forest Service with Dr. Claudio Saunt, with links to each treaty. CC BY.</li>
+      <li><a href="https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html" target="_blank" rel="noopener">US Census Bureau</a>: American Indian / Alaska Native / Native Hawaiian areas (reservations, trust lands, Hawaiian home lands). Public domain.</li>
+      <li><a href="https://open.canada.ca/data/en/dataset/522b07b9-78e2-4819-b736-ad9208eb1067" target="_blank" rel="noopener">Aboriginal Lands of Canada Legislative Boundaries</a>, Natural Resources Canada. Open Government Licence – Canada.</li>
+      <li><a href="https://native-land.ca/" target="_blank" rel="noopener">Native Land Digital</a>: an Indigenous-led map of territories, languages and treaties worldwide, well worth exploring alongside this one.</li>
     </ul>
     <h3>Base map and code</h3>
     <ul>
@@ -607,9 +617,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     <label class="check"><input type="checkbox" id="showEvents" checked> Events</label>
     <div class="ev-types" id="evTypes" aria-label="Event types"></div>
     <label class="check"><input type="checkbox" id="showCities" checked> <span class="city-swatch" aria-hidden="true"></span>Cities</label>
+    <label class="check"><input type="checkbox" id="showLands"> <span class="land-swatch" aria-hidden="true"></span>Native lands (US cessions)</label>
     <label class="check"><input type="checkbox" id="showModern"> <span class="dash-swatch" aria-hidden="true"></span>Today's borders</label>
   </div>
-  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · Events: hand-picked + <a href="https://www.wikidata.org/">Wikidata</a> · Cities: <a href="https://doi.org/10.1038/sdata.2016.34">Reba et al. 2016</a> (CC BY 4.0)</div>
+  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · Events: hand-picked + <a href="https://www.wikidata.org/">Wikidata</a> · Native lands: USDA Forest Service, US Census, NRCan · Cities: <a href="https://doi.org/10.1038/sdata.2016.34">Reba et al. 2016</a> (CC BY 4.0)</div>
 </div>
 
 <script>
@@ -769,7 +780,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     gratPath = new Path2D(); d3.geoPath(projection, gratPath)(graticule);
     for (const o of feats) o.path = null;
     if (compare) { compare.x = Math.min(compare.x, W); compare.visibleB = listFor(compare.yearB); }
-    buildModern();
+    buildModern(); buildLands(); hatch = null;
     sizeSpark();
     draw();
   }
@@ -784,6 +795,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   let spot = null, quiz = null, tour = null, pickMode = false, lastClickLL = null, compare = null;
   let cities = null, showCities = true, cityHits = [];
   let events = null, showEvents = true, eventHits = [], openEvent = null;
+  let lands = null, landsLoading = null, showLands = false, cardData = null, openLand = null;
   const evCats = { war: true, politics: true, exploration: true, culture: true, disaster: true };
   const extraResolved = new Map();
 
@@ -1048,6 +1060,142 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   }
   const evYearText = (e) => (e.approx ? "around " : "") + fmtS(e.y);
 
+  // ---------- Native lands: US land cessions 1784-1894 (Royce / USDA Forest Service) + today's reservations & reserves ----------
+  const LAND = "#e3b36b", RES = "#7fc7a8";
+  const titleCaseName = (n) => n.split(/\s+/).map(w => /\./.test(w) || /^[IVX]+$/.test(w) ? (w === "NO." ? "No." : w) : w.charAt(0) + w.slice(1).toLowerCase()).join(" ");
+  function loadLands() {
+    if (lands || landsLoading) return landsLoading;
+    landsLoading = fetch("indigenous.json").then(r => r.json()).then(t => {
+      const pick = (name) => t.objects[name] ? topojson.feature(t, t.objects[name]).features.filter(f => f.geometry) : [];
+      lands = {
+        cessions: pick("cessions").map(f => ({ f, kind: "cession", ...f.properties, t: (f.properties.t || "Unnamed").replace(/;\s*/g, ", ") })),
+        reserves: pick("reserves").map(f => ({ f, kind: "reserve", name: f.properties.src === "ca" ? titleCaseName(f.properties.name || "") : (f.properties.name || ""), src: f.properties.src })),
+      };
+      buildLands(); draw();
+    }).catch(() => { landsLoading = null; toast("Native lands data couldn't load. Try the toggle again.", 3500); });
+    return landsLoading;
+  }
+  function buildLands() {
+    if (!lands) return;
+    for (const o of [...lands.cessions, ...lands.reserves]) {
+      if (!o.fixed) { if (d3.geoArea(o.f) > 2 * Math.PI) { const g = o.f.geometry, rev = p => p.map(r => r.slice().reverse()); g.coordinates = g.type === "Polygon" ? rev(g.coordinates) : g.coordinates.map(rev); } o.fixed = true; }
+      o.path = new Path2D(); d3.geoPath(projection, o.path)(o.f);
+      o.bounds = geoPath.bounds(o.f); o.area = geoPath.area(o.f);
+      let target = o.f, best = o.area;
+      if (o.f.geometry.type === "MultiPolygon") {
+        best = -1;
+        for (const poly of o.f.geometry.coordinates) { const pf = { type: "Feature", geometry: { type: "Polygon", coordinates: poly } }; const a = geoPath.area(pf); if (a > best) { best = a; target = pf; } }
+      }
+      o.labelArea = best; o.centroid = geoPath.centroid(target); o.ll = d3.geoCentroid(target);
+    }
+  }
+  let hatch = null;
+  function hatchPattern() {
+    if (hatch) return hatch;
+    const c = document.createElement("canvas"); c.width = c.height = Math.round(8 * dpr);
+    const g = c.getContext("2d"); g.scale(dpr, dpr);
+    g.strokeStyle = "rgba(227,179,107,0.75)"; g.lineWidth = 1.4;
+    g.beginPath(); g.moveTo(-2, 10); g.lineTo(10, -2); g.moveTo(-2, 2); g.lineTo(2, -2); g.moveTo(6, 10); g.lineTo(10, 6); g.stroke();
+    hatch = ctx.createPattern(c, "repeat");
+    return hatch;
+  }
+  // a cession tract shows as Native land until its treaty date, then briefly as a dashed outline as it is ceded
+  const cessionState = (o, y) => (y >= 1700 && y < o.y) ? "held" : (y >= o.y && y <= o.y + 2 ? "ceded" : null);
+  function drawLandAreas(y, k, inView) {
+    if (!lands || quiz) return;
+    if (showLands) {
+      const pat = hatchPattern();
+      if (pat.setTransform) pat.setTransform(new DOMMatrix().scale(1 / (k * dpr)));
+      for (const o of lands.cessions) {
+        const st = cessionState(o, y); if (!st || !inView(o.bounds)) continue;
+        if (st === "held") {
+          ctx.fillStyle = "rgba(227,179,107,0.16)"; ctx.fill(o.path);
+          ctx.fillStyle = pat; ctx.fill(o.path);
+          ctx.strokeStyle = "rgba(227,179,107,0.85)"; ctx.lineWidth = 0.9 / k; ctx.stroke(o.path);
+        } else {
+          ctx.setLineDash([3 / k, 3 / k]); ctx.strokeStyle = "rgba(227,179,107,0.7)"; ctx.lineWidth = 1.2 / k; ctx.stroke(o.path); ctx.setLineDash([]);
+        }
+      }
+      if (openLand && openLand.kind === "cession" && openLand.path) { ctx.strokeStyle = C.brass; ctx.lineWidth = 2.6 / k; ctx.stroke(openLand.path); }
+    }
+    if (showModern) {
+      for (const o of lands.reserves) {
+        if (!inView(o.bounds)) continue;
+        ctx.fillStyle = "rgba(127,199,168,0.32)"; ctx.fill(o.path);
+        ctx.strokeStyle = "rgba(127,199,168,0.95)"; ctx.lineWidth = 0.8 / k; ctx.stroke(o.path);
+      }
+      if (openLand && openLand.kind === "reserve" && openLand.path) { ctx.strokeStyle = C.brass; ctx.lineWidth = 2.2 / k; ctx.stroke(openLand.path); }
+    }
+  }
+  function drawLandLabels(y, k, boxes) {
+    if (!lands || quiz) return;
+    const family = getComputedStyle(document.body).fontFamily;
+    const place = (o, text, maxSize, minSize, color, weight) => {
+      const sx = o.centroid[0] * k + transform.x, sy = o.centroid[1] * k + transform.y;
+      if (sx < -50 || sx > W + 50 || sy < -20 || sy > H + 20) return;
+      const size = Math.min(maxSize, (Math.sqrt(o.labelArea) * k * 0.9) / (text.length * 0.55));
+      if (size < minSize) return;
+      ctx.font = `italic ${weight} ${size.toFixed(1)}px ${family}`;
+      const w = ctx.measureText(text).width, h = size * 1.25;
+      const b = [sx - w / 2 - 2, sy - h / 2, sx + w / 2 + 2, sy + h / 2];
+      if (boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]))) return;
+      boxes.push(b);
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.85)"; ctx.strokeText(text, sx, sy);
+      ctx.fillStyle = color; ctx.fillText(text, sx, sy);
+    };
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if (showLands) {
+      const vis = lands.cessions.filter(o => cessionState(o, y) === "held").sort((a, b) => b.labelArea - a.labelArea);
+      for (const o of vis) place(o, o.t, 14, 9, "#f0c98a", 600);
+    }
+    if (showModern && k >= 3) {
+      const vis = lands.reserves.slice().sort((a, b) => b.labelArea - a.labelArea);
+      for (const o of vis.slice(0, 400)) place(o, o.name, 11, 8.5, "#a9dcc5", 500);
+    }
+  }
+  function landAt(cx, cy) {
+    if (!lands || quiz) return null;
+    const bx = (cx - transform.x) / transform.k, by = (cy - transform.y) / transform.k;
+    const inB = (b) => b && bx >= b[0][0] && bx <= b[1][0] && by >= b[0][1] && by <= b[1][1];
+    let best = null;
+    const test = (o) => { if (o.path && inB(o.bounds) && hitCtx.isPointInPath(o.path, bx, by) && (!best || o.area < best.area)) best = o; };
+    if (showLands) { const y = compare && cx > compare.x ? compare.yearB : year; for (const o of lands.cessions) if (cessionState(o, y) === "held") test(o); }
+    if (showModern) for (const o of lands.reserves) test(o);
+    return best;
+  }
+  const fmtDate = (iso) => { const [y, m, d] = iso.split("-").map(Number); return `${d} ${["January","February","March","April","May","June","July","August","September","October","November","December"][m - 1]} ${y}`; };
+  function showLand(o) {
+    openLand = o; openEvent = null;
+    selected = null; renderInfo();
+    const links = $("evLinks"); links.innerHTML = "";
+    const add = (href, text) => { if (!href) return; const a = document.createElement("a"); a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = text; links.appendChild(a); links.append(" "); };
+    if (o.kind === "cession") {
+      cardData = { y: o.y, ll: o.ll, t: o.t, spotLabel: "this land" };
+      $("evKicker").innerHTML = `<span class="land-swatch" style="margin-right:6px;vertical-align:-1px"></span>Land cession to the United States`;
+      $("evTitle").textContent = o.t;
+      $("evWhen").textContent = `Ceded ${fmtDate(o.d)}${o.n ? ` · Royce area ${o.n}` : ""}`;
+      const tribes = (o.p || "").split(/;\s*/).filter(Boolean);
+      const shown = tribes.slice(0, 6).join("; ") + (tribes.length > 6 ? `; and ${tribes.length - 6} more` : "");
+      $("evText").textContent = tribes.length ? `Present-day nations connected to this land: ${shown}.` : "";
+      $("evSrc").textContent = "From Royce's Indian Land Cessions in the United States (1899), digitized by the USDA Forest Service.";
+      $("evJump").textContent = `Go to ${o.y}`; $("evJump").hidden = false; $("evSpot").hidden = false;
+      add(o.l, "Read the treaty or act ↗"); add(o.r, "Royce's schedule entry ↗");
+    } else {
+      cardData = { y: 2024, ll: o.ll, t: o.name };
+      $("evKicker").innerHTML = `<span style="display:inline-block;width:10px;height:10px;background:${RES};margin-right:6px;vertical-align:-1px"></span>${o.src === "ca" ? "First Nations reserve or settlement land, today" : "Reservation or trust land, today"}`;
+      $("evTitle").textContent = o.name;
+      $("evWhen").textContent = "";
+      $("evText").textContent = o.src === "ca"
+        ? "Boundary from Natural Resources Canada's Aboriginal Lands of Canada Legislative Boundaries."
+        : "Boundary from the US Census Bureau's American Indian / Alaska Native / Native Hawaiian areas.";
+      $("evSrc").textContent = "";
+      $("evJump").hidden = true; $("evSpot").hidden = false;
+    }
+    $("evCard").classList.add("show");
+    track("land_open", { kind: o.kind });
+    draw();
+  }
+
   // ---------- drawing ----------
   let drawQueued = false;
   function draw() {
@@ -1095,6 +1243,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       }
       ctx.setLineDash([]);
     }
+    drawLandAreas(sceneYear, k, inView);
     const qt = quizTarget();
     if (qt && qt.path) {
       ctx.strokeStyle = "rgba(10,18,25,0.9)"; ctx.lineWidth = 5 / k; ctx.stroke(qt.path);
@@ -1139,6 +1288,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
     }
 
+    drawLandLabels(sceneYear, k, boxes);
     drawEvents(sceneYear, boxes, clip);
     drawCities(sceneYear, boxes, clip);
 
@@ -1379,6 +1529,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     if (eh) { showEvent(eh.e); return; }
     const ch = cityAt(e.clientX, e.clientY);
     if (ch) { openSpot(ch.c.ll, ch.name); return; }
+    const lh = !pickMode && landAt(e.clientX, e.clientY);
+    if (lh) { showLand(lh); return; }
     if (pickMode) { if (ll) openSpot(ll); return; }
     lastClickLL = ll;
     selected = hitAt(e.clientX, e.clientY);
@@ -1412,6 +1564,16 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
         if (hovered) { hovered = null; draw(); }
         const today = ch.name !== ch.c.n ? ` (today ${ch.c.n === "Xian" ? "Xi'an" : ch.c.n === "Ho Chi Minh" ? "Ho Chi Minh City" : ch.c.n})` : "";
         tip.textContent = `${ch.name}${today} · about ${fmtPop(ch.p)} people`;
+        tip.style.display = "block";
+        tip.style.left = Math.min(W - tip.offsetWidth - 8, lastMove.clientX + 14) + "px";
+        tip.style.top = (lastMove.clientY + 14) + "px";
+        canvas.style.cursor = "pointer";
+        return;
+      }
+      const lh = landAt(lastMove.clientX, lastMove.clientY);
+      if (lh) {
+        if (hovered) { hovered = null; draw(); }
+        tip.textContent = lh.kind === "cession" ? `${lh.t} · ceded ${lh.y}` : lh.name;
         tip.style.display = "block";
         tip.style.left = Math.min(W - tip.offsetWidth - 8, lastMove.clientX + 14) + "px";
         tip.style.top = (lastMove.clientY + 14) + "px";
@@ -1488,7 +1650,13 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   $("searchInput").addEventListener("input", () => $("searchInput").setCustomValidity(""));
 
   $("showRel").addEventListener("change", (e) => { showRel = e.target.checked; computeVisible(); if (compare) compare.visibleB = listFor(compare.yearB); draw(); });
-  $("showModern").addEventListener("change", (e) => { showModern = e.target.checked; if (showModern) loadModern(); draw(); });
+  $("showModern").addEventListener("change", (e) => { showModern = e.target.checked; if (showModern) { loadModern(); loadLands(); } draw(); });
+  $("showLands").addEventListener("change", (e) => {
+    showLands = e.target.checked;
+    if (showLands) { loadLands(); track("lands_on"); if (year < 1700 || year > 1893) toast("Native land cessions show from 1700 to 1893. Try 1800 and press Play.", 4500); }
+    else if (openLand && openLand.kind === "cession") closeEvent();
+    draw();
+  });
 
   window.addEventListener("keydown", (e) => {
     if (document.querySelector("dialog[open]")) return;
@@ -2497,7 +2665,9 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   // ----- event card -----
   const evSummaryCache = new Map();
   function showEvent(e) {
-    openEvent = e;
+    openEvent = e; openLand = null;
+    cardData = { y: e.y, ll: e.ll, t: e.t };
+    $("evJump").hidden = false; $("evSpot").hidden = false;
     selected = null; renderInfo();
     $("evKicker").innerHTML = `${evShapeSVG(e.cat).replace("<svg", '<svg style="width:10px;height:10px;display:inline-block;vertical-align:-1px;margin-right:6px"')}${esc(EV[e.cat].label)}`;
     $("evTitle").textContent = e.t;
@@ -2521,10 +2691,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       }, () => { evSummaryCache.delete(key); if (openEvent === e) $("evSrc").textContent = "Couldn't load a summary from Wikipedia."; });
     } else if (!e.d) $("evSrc").textContent = "";
   }
-  function closeEvent() { openEvent = null; $("evCard").classList.remove("show"); draw(); }
+  function closeEvent() { openEvent = null; openLand = null; cardData = null; $("evCard").classList.remove("show"); draw(); }
   $("evClose").onclick = closeEvent;
-  $("evJump").onclick = () => { const e = openEvent; if (!e) return; pause(); tourHold(); setYear(Math.max(MIN_Y, Math.min(MAX_Y, e.y)), 1); flyTo(e.ll, Math.max(transform.k, 4)); writeHash(); };
-  $("evSpot").onclick = () => { const e = openEvent; if (!e) return; closeEvent(); openSpot(e.ll, e.t); };
+  $("evJump").onclick = () => { const e = cardData; if (!e) return; pause(); tourHold(); setYear(Math.max(MIN_Y, Math.min(MAX_Y, e.y)), 1); if (e.ll) flyTo(e.ll, Math.max(transform.k, 4)); writeHash(); };
+  $("evSpot").onclick = () => { const e = cardData; if (!e || !e.ll) return; closeEvent(); openSpot(e.ll, e.spotLabel || e.t); };
 
   // ----- ticker: names events as playback passes them -----
   let tickPrev = null;
