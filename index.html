@@ -762,6 +762,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     return o;
   }
 
+  let lakesGeo = null, lakesPath = null;
   function resize() {
     dpr = window.devicePixelRatio || 1;
     W = window.innerWidth; H = window.innerHeight;
@@ -780,6 +781,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     }
     spherePath = new Path2D(); d3.geoPath(projection, spherePath)({ type: "Sphere" });
     landPath = new Path2D(); d3.geoPath(projection, landPath)(land);
+    if (lakesGeo) { lakesPath = new Path2D(); d3.geoPath(projection, lakesPath)(lakesGeo); }
     gratPath = new Path2D(); d3.geoPath(projection, gratPath)(graticule);
     for (const o of feats) o.path = null;
     if (compare) { compare.x = Math.min(compare.x, W); compare.visibleB = listFor(compare.yearB); }
@@ -1164,13 +1166,41 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     ["Lake Ladoga", 31.6, 61, 6, 2], ["Lake Titicaca", -69.4, -15.8, 7, 2], ["Lake Maracaibo", -71.6, 9.8, 7, 2],
     ["Great Salt Lake", -112.5, 41.1, 8, 2], ["Dead Sea", 35.5, 31.5, 12, 2, -80], ["Sea of Galilee", 35.6, 32.8, 18, 2],
   ];
+  // Period names: [from year, to year, name] — shown instead of today's name inside the range
+  const WATER_ERAS = {
+    "Mediterranean Sea": [[-200, 500, "Mare Nostrum"]],
+    "Black Sea": [[-600, 500, "Pontus Euxinus"]],
+    "Sea of Azov": [[-600, 500, "Lake Maeotis"]],
+    "Sea of Marmara": [[-600, 500, "Propontis"]],
+    "Caspian Sea": [[-500, 500, "Hyrcanian Sea"]],
+    "Red Sea": [[-300, 500, "Arabian Gulf"]],
+    "Persian Gulf": [[-300, 500, "Persian Sea"]],
+    "Arabian Sea": [[-500, 600, "Erythraean Sea"]],
+    "Bay of Bengal": [[-100, 500, "Gangetic Gulf"]],
+    "English Channel": [[-50, 500, "Oceanus Britannicus"]],
+    "North Sea": [[-50, 500, "Mare Germanicum"], [1500, 1914, "German Ocean"]],
+    "Baltic Sea": [[0, 400, "Mare Suebicum"]],
+    "Bay of Biscay": [[-100, 500, "Cantabrian Sea"]],
+    "Dead Sea": [[-100, 500, "Lake Asphaltites"]],
+    "South Atlantic Ocean": [[1500, 1850, "Ethiopian Ocean"]],
+    "South Pacific Ocean": [[1513, 1750, "South Sea"]],
+    "Gulf of Thailand": [[1600, 1939, "Gulf of Siam"]],
+    "Lake Malawi": [[1859, 1964, "Lake Nyasa"]],
+    "Lake Victoria": [[1000, 1857, "Nalubaale"]],
+  };
+  const waterName = (name, y) => { for (const [a, b, n] of WATER_ERAS[name] || []) if (y >= a && y <= b) return n; return name; };
   let showWater = true;
-  function drawWater(boxes) {
+  fetch("lakes.json").then(r => r.json()).then(t => {
+    lakesGeo = topojson.feature(t, t.objects.lakes50);
+    lakesPath = new Path2D(); d3.geoPath(projection, lakesPath)(lakesGeo); draw();
+  }).catch(() => {});
+  function drawWater(boxes, y) {
     if (!showWater || quiz) return;
     const k = transform.k;
     const base = [15, 11.5, 10], color = ["rgba(143,185,214,0.62)", "rgba(143,185,214,0.78)", "rgba(160,200,225,0.85)"];
     if ("letterSpacing" in ctx) ctx.letterSpacing = "0.5px";
-    for (const [name, lon, lat, minK, tier, ang] of WATER) {
+    for (const [modernName, lon, lat, minK, tier, ang] of WATER) {
+      const name = waterName(modernName, y);
       if (k < minK) continue;
       const s = llToScreen([lon, lat]); if (!s) continue;
       let [sx, sy] = s;
@@ -1312,6 +1342,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       }
       ctx.setLineDash([]);
     }
+    if (lakesPath) { // lakes: a quiet blue, distinct from both sea and empty land
+      ctx.fillStyle = "#1a3a52"; ctx.fill(lakesPath);
+      ctx.strokeStyle = "rgba(143,185,214,0.35)"; ctx.lineWidth = 0.6 / k; ctx.stroke(lakesPath);
+    }
     drawLandAreas(sceneYear, k, inView);
     const qt = quizTarget();
     if (qt && qt.path) {
@@ -1357,7 +1391,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
     }
 
-    drawWater(boxes);
+    drawWater(boxes, sceneYear);
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     drawLandLabels(sceneYear, k, boxes);
     drawEvents(sceneYear, boxes, clip);
