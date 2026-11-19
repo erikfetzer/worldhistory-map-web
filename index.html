@@ -114,25 +114,25 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 .modal .foot { margin-top: 18px; display: flex; justify-content: flex-end; }
 .modal .foot button { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
 
-#cookie { position: fixed; right: 16px; top: 80px; width: 330px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; backdrop-filter: blur(8px); display: none; gap: 14px; grid-template-columns: 56px 1fr; box-shadow: 0 16px 40px rgba(0,0,0,0.4); z-index: 5; }
-#cookie.show { display: grid; }
-#cookie svg { width: 56px; height: 56px; animation: wobble 3.2s ease-in-out infinite; }
-#cookie h2 { font-family: var(--font-display); font-weight: 650; font-size: 17px; margin: 0 0 4px; text-wrap: balance; }
-#cookie p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
-#cookie .row { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
-#cookie .cookie-x { position: absolute; top: 6px; right: 6px; border: none; background: none; color: var(--muted); font-size: 20px; line-height: 1; min-height: 0; padding: 4px 8px; }
-#cookie .cookie-x:hover { color: var(--ink); }
-#cookie h2 { padding-right: 22px; }
-#cookie .accept { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
+#crumbNote { position: fixed; right: 16px; top: 80px; width: 330px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; backdrop-filter: blur(8px); display: none; gap: 14px; grid-template-columns: 56px 1fr; box-shadow: 0 16px 40px rgba(0,0,0,0.4); z-index: 5; }
+#crumbNote.show { display: grid; }
+#crumbNote svg { width: 56px; height: 56px; animation: wobble 3.2s ease-in-out infinite; }
+#crumbNote h2 { font-family: var(--font-display); font-weight: 650; font-size: 17px; margin: 0 0 4px; text-wrap: balance; }
+#crumbNote p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+#crumbNote .row { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+#crumbNote .note-x { position: absolute; top: 6px; right: 6px; border: none; background: none; color: var(--muted); font-size: 20px; line-height: 1; min-height: 0; padding: 4px 8px; }
+#crumbNote .note-x:hover { color: var(--ink); }
+#crumbNote h2 { padding-right: 22px; }
+#crumbNote .note-ok { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
 @keyframes wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(8deg); } }
-@media (prefers-reduced-motion: reduce) { #cookie svg { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #crumbNote svg { animation: none; } }
 
 .mobile-only { display: none; }
 #loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--font-display); font-size: 22px; color: var(--muted); background: var(--void); }
 
 @media (max-width: 760px) {
   .brand p { display: none; }
-  #cookie { left: 8px; right: 8px; top: auto; bottom: var(--dockH, 380px); width: auto; }
+  #crumbNote { left: 8px; right: 8px; top: auto; bottom: var(--dockH, 380px); width: auto; }
   .dock > * { min-width: 0; }
   .controls .group { flex-wrap: wrap; justify-content: center; }
   .controls { gap: 8px 10px; }
@@ -186,8 +186,8 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 </div>
 <div id="tip"></div>
 
-<aside id="cookie" role="region" aria-label="Cookie notice">
-  <button type="button" class="cookie-x" id="cookieX" aria-label="Close cookie notice">×</button>
+<aside id="crumbNote" role="region" aria-label="A note about crumbs">
+  <button type="button" class="note-x" id="crumbX" aria-label="Close this note">×</button>
   <svg viewBox="0 0 64 64" aria-hidden="true">
     <path d="M32 4a28 28 0 1 0 27.6 23.2 7 7 0 0 1-8.4-6.8 7 7 0 0 1-8.8-8.7A7 7 0 0 1 35.6 4.2 28.6 28.6 0 0 0 32 4Z" fill="#c98f4a" stroke="#0a1219" stroke-width="2"/>
     <circle cx="22" cy="24" r="3.6" fill="#3b2414"/><circle cx="36" cy="34" r="3" fill="#3b2414"/><circle cx="20" cy="42" r="3.4" fill="#3b2414"/><circle cx="44" cy="46" r="2.8" fill="#3b2414"/><circle cx="31" cy="50" r="2.2" fill="#3b2414"/>
@@ -198,7 +198,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   </div>
   <div class="row">
     <button type="button" class="linkbtn" data-open="disclaimer">Read the fine print</button>
-    <button type="button" class="accept" id="cookieOk">Accept all empires</button>
+    <button type="button" class="note-ok" id="crumbOk">Accept all empires</button>
   </div>
 </aside>
 
@@ -776,16 +776,16 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     if (e.target.closest("[data-close]")) { e.target.closest("dialog").close(); return; }
     if (e.target.tagName === "DIALOG") e.target.close(); // click on the backdrop
   });
-  const cookie = $("cookie");
+  const crumb = $("crumbNote");
   let seen = false;
   try { seen = localStorage.getItem("wre-cookie-ok") === "1"; } catch (e) {}
-  if (!seen) setTimeout(() => cookie.classList.add("show"), 1200);
-  const closeCookie = () => {
-    cookie.classList.remove("show");
+  if (!seen) setTimeout(() => crumb.classList.add("show"), 1200);
+  const closeCrumb = () => {
+    crumb.classList.remove("show");
     try { localStorage.setItem("wre-cookie-ok", "1"); } catch (e) {}
   };
-  $("cookieOk").onclick = closeCookie;
-  $("cookieX").onclick = closeCookie;
+  $("crumbOk").onclick = closeCrumb;
+  $("crumbX").onclick = closeCrumb;
 
   // ---------- go ----------
   setRange(-800, 500);
