@@ -16,6 +16,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - **Who ruled here?** Right-click (or long-press, or use the button) on any spot to see every power that held it from 3400 BCE to today, as a timeline and a clickable list
 - **Daily quiz:** five rounds a day (one per era), same questions for everyone that day, with a streak counter and a shareable score grid. Results stay in the visitor's browser
 - **Guided tours:** captioned stories that move the map and the timeline (Rome, Alexander, the Mongols, the scramble for Africa, World War I)
+- **Famous journeys:** follow Marco Polo, Ibn Battuta, Magellan and Elcano, Lewis and Clark, Darwin on the Beagle and Albert Einstein stop by stop, with the route drawn on the map and who ruled each place when they arrived
 - **Rise and fall:** the details card graphs each polity's territory over its whole life (click the graph to jump), and **Largest empires** ranks the top 10 by area for the current year, updating live during playback
 - **Compare years:** a draggable divider shows one year on the left and another on the right, over the same view
 - **Share and record:** links keep the year, the view, the selected polity and the compare year (`#y1250x80p09l47p09z2p98sMongol-Empire`); **Record clip** turns the play range into an MP4 or WebM video with the year burned in, ready to download or share

@@ -7,6 +7,7 @@ a simple, neutral proxy for how widely known an event is.
 
 Output rows: [year, lon, lat, category, title, wikipediaTitle, sitelinks, qid]
 """
+import re
 import json, sys, time, urllib.parse, urllib.request
 
 ENDPOINT = "https://query.wikidata.org/sparql"
@@ -17,7 +18,8 @@ UA = "whoruled.earth events builder (https://whoruled.earth; https://github.com/
 CLASSES = {
     "war": [("Q178561", 22), ("Q188055", 18), ("Q1261499", 18)],                      # battle, siege, naval battle
     "politics": [("Q131569", 12), ("Q625298", 12), ("Q10931", 12), ("Q124734", 14),     # treaty, peace treaty, revolution, rebellion
-                 ("Q3882219", 14, 1990), ("Q45382", 18)],                                     # assassination, coup d'état
+                 ("Q3882219", 14, 1990), ("Q45382", 18),                                      # assassination, coup d'état
+                 ("Q273120", 30), ("Q3199915", 30)],                                           # protest, massacre (well-known ones only)
     "exploration": [("Q2401485", 10)],                                                  # expedition
     "disaster": [("Q7944", 16), ("Q7692360", 14), ("Q8070", 14), ("Q168983", 16)],      # earthquake, eruption, tsunami, great fire
 }
@@ -107,6 +109,9 @@ for cat, classes in CLASSES.items():
             wiki = urllib.parse.unquote(art.rsplit("/wiki/", 1)[-1]).replace("_", " ") if art else ""
             sl = int(b["sl"]["value"])
             cur = events.get(qid)
+            # The Wikipedia article title is better watched than the Wikidata label, so prefer it
+            if wiki:
+                label = re.sub(r"\s*\([^)]*\)$", "", wiki)
             row = [y, ll[0], ll[1], cat, label, wiki, sl, qid]
             # keep a point-in-time date over a start date; among equals keep the earliest
             if cur is None or (kind, y) < (cur_kind.get(qid, 9), cur[0]):

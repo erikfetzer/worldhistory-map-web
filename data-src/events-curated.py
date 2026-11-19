@@ -234,6 +234,7 @@ E = [
 (1978, 0, 116.4, 39.9, "politics", "China opens up", "Deng Xiaoping begins reforms that open China's economy.", "Reform and opening up"),
 (1986, 0, 30.1, 51.39, "disaster", "Chernobyl", "A nuclear reactor explodes in Soviet Ukraine.", "Chernobyl disaster"),
 (1989, 0, 13.38, 52.516, "politics", "Berlin Wall falls", "East Germans cross the Wall freely; the Cold War is ending.", "Fall of the Berlin Wall"),
+(1989, 0, 116.391, 39.905, "politics", "Tiananmen Square protests", "Weeks of student-led protests in Beijing end on 4 June when troops open fire, killing hundreds, possibly thousands.", "1989 Tiananmen Square protests and massacre"),
 (1989, 0, 6.05, 46.23, "culture", "World Wide Web", "Tim Berners-Lee proposes the Web at CERN.", "World Wide Web"),
 (1991, 0, 37.62, 55.75, "politics", "Soviet Union dissolves", "The USSR breaks into 15 independent countries.", "Dissolution of the Soviet Union"),
 (1994, 0, 28.19, -25.75, "politics", "End of apartheid", "South Africa's first all-race election makes Nelson Mandela president.", "1994 South African general election"),

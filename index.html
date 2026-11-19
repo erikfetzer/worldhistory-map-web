@@ -175,6 +175,8 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #infoMore .src { color: var(--muted); font-size: 11px; }
 #infoMore h4 { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .water-swatch { color: #8fb9d6; font-family: Fraunces, serif; font-style: italic; margin-right: 2px; }
+#tourCard .tplace { font-family: Fraunces, serif; font-size: 17px; margin: -2px 0 4px; }
+#tourCard .truler { font-size: 12.5px; color: var(--muted); margin: -4px 0 8px; } #tourCard .truler b { color: var(--brass); font-weight: 600; }
 #infoMore .rnow { margin: 2px 0 6px; font-size: 13.5px; } #infoMore .rnow b { color: var(--brass); font-weight: 600; }
 #infoMore ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
 #infoMore .num { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--brass); color: #1b1408; font-size: 10px; font-weight: 700; }
@@ -353,6 +355,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     <p>Political borders from 3400 BCE to 2024 CE. Drag to pan, scroll or pinch to zoom, click a territory for details. Right-click any spot to see everyone who ruled it.</p>
     <div class="feature-row">
       <button type="button" class="pill" data-open="tours">Tours</button>
+      <button type="button" class="pill" data-open="journeys">Journeys</button>
       <button type="button" class="pill" id="openQuiz">Daily quiz</button>
       <button type="button" class="pill" id="pickSpot" aria-pressed="false" title="Or right-click / long-press any spot">Who ruled here?</button>
       <button type="button" class="pill" id="openLeaders" aria-pressed="false">Largest empires</button>
@@ -428,7 +431,9 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   <button type="button" class="x" id="tourExit" aria-label="End tour">×</button>
   <div class="kicker" id="tourKicker"></div>
   <div class="tyear" id="tourYear"></div>
+  <div class="tplace" id="tourPlace" hidden></div>
   <p id="tourText"></p>
+  <div class="truler" id="tourRuler" hidden></div>
   <div class="tour-progress"><i id="tourBar"></i></div>
   <div class="tour-controls">
     <button type="button" id="tourPrev">‹ Back</button>
@@ -445,6 +450,16 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     <h2 id="toursTitle">Guided tours</h2>
     <p>Each tour moves the map and the timeline for you, with a short note at each stop. Pause or skip any time.</p>
     <div class="tour-list" id="tourList"></div>
+  </div>
+</dialog>
+
+<dialog class="modal" id="dlg-journeys" aria-labelledby="journeysTitle">
+  <div class="modal-inner">
+    <button type="button" class="close-x" data-close aria-label="Close">×</button>
+    <div class="kicker">Follow a traveler</div>
+    <h2 id="journeysTitle">Famous journeys</h2>
+    <p>Follow a famous route stop by stop. The map draws the trail and shows who ruled each place when the traveler arrived.</p>
+    <div class="tour-list" id="journeyList"></div>
   </div>
 </dialog>
 
@@ -1905,6 +1920,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
 
   // pins: the spot you picked, plus the selected polity's capital and numbered events
   function drawPins() {
+    drawJourney();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const family = getComputedStyle(document.body).fontFamily;
     if (spot) {
@@ -2470,6 +2486,134 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     <p>${esc(t.blurb)}</p><button type="button" class="primary" data-tour="${i}">Start</button></div>`).join("");
   $("tourList").querySelectorAll("[data-tour]").forEach(b => b.onclick = () => { $("dlg-tours").close(); startTour(+b.dataset.tour); });
 
+  // Famous journeys: stops in order; "via" adds waypoints so sea routes don't cut across land
+  const JOURNEYS = [
+    { title: "Marco Polo", blurb: "A Venetian merchant's son crosses Asia to the court of Kublai Khan and returns by sea 24 years later.", span: "1271–1295", steps: [
+      { y: 1271, c: [12.33, 45.44], k: 4, place: "Venice", t: "In 1271, 17-year-old Marco sets out with his father and uncle, merchants returning to Kublai Khan's court." },
+      { y: 1271, c: [35.07, 32.93], k: 4, place: "Acre", t: "In the crusader port of Acre they collect holy oil from Jerusalem that Kublai Khan had asked for." },
+      { y: 1272, c: [56.46, 27.1], k: 3.5, via: [[40, 39], [46.3, 38.1]], place: "Hormuz", t: "They head through Persia to the port of Hormuz, hoping to sail to China, but turn back overland, perhaps because the ships look unsafe." },
+      { y: 1273, c: [75.99, 39.47], k: 3.2, via: [[66.9, 36.75]], place: "Kashgar", t: "Crossing the Pamir mountains, they reach Kashgar, an oasis city on the Silk Road." },
+      { y: 1275, c: [116.18, 42.36], k: 3, via: [[94.66, 40.14]], place: "Shangdu (Xanadu)", t: "After skirting the Gobi Desert, they reach Kublai Khan's summer capital, Shangdu, more than three years after leaving Venice." },
+      { y: 1275, c: [116.4, 39.9], k: 4, place: "Khanbaliq (Beijing)", t: "Marco serves the Khan for about 17 years, he says, travelling across China on missions from the capital Khanbaliq." },
+      { y: 1291, c: [118.59, 24.87], k: 4, place: "Quanzhou", t: "In 1291 the Polos sail from Quanzhou, escorting a Mongol princess, Kököchin, to marry the Ilkhan ruler of Persia." },
+      { y: 1292, c: [97.2, 5.2], k: 3.5, via: [[109, 12]], place: "Sumatra", t: "The fleet waits out the monsoon for five months on Sumatra." },
+      { y: 1293, c: [56.46, 27.1], k: 3, via: [[80, 6], [72, 18]], place: "Hormuz", t: "They reach Persia by way of Sri Lanka and India. Many of the passengers and crew have died on the voyage." },
+      { y: 1295, c: [12.33, 45.44], k: 3, via: [[46.3, 38.1], [39.7, 41], [29, 41]], place: "Venice", t: "In 1295 they are home. Captured in a war with Genoa, Marco later dictates his travels to a cellmate, and the book makes him famous." },
+    ] },
+    { title: "Ibn Battuta", blurb: "A young scholar from Tangier sets off for Mecca and keeps going, about 120,000 km over 29 years.", span: "1325–1354", steps: [
+      { y: 1325, c: [-5.81, 35.77], k: 4, place: "Tangier", t: "In 1325, aged 21, Ibn Battuta leaves Tangier alone to make the pilgrimage to Mecca." },
+      { y: 1326, c: [31.24, 30.04], k: 4, place: "Cairo", t: "He reaches Cairo, capital of the Mamluk Sultanate and one of the largest cities in the world." },
+      { y: 1326, c: [39.83, 21.42], k: 4, via: [[35.5, 33.5], [36.3, 33.5]], place: "Mecca", t: "Travelling by way of Damascus, he completes the pilgrimage, then decides to see as much of the world as he can." },
+      { y: 1327, c: [44.36, 33.31], k: 4, place: "Baghdad", t: "He joins a caravan to Iraq and visits Baghdad, still recovering from its sack by the Mongols in 1258." },
+      { y: 1331, c: [45.34, 2.05], k: 3.5, via: [[43, 13], [44.5, 12]], place: "Mogadishu", t: "From Aden he sails down the coast of East Africa, visiting Mogadishu and the trading city of Kilwa." },
+      { y: 1332, c: [28.98, 41.01], k: 3.5, via: [[45, 12], [39, 22], [33, 40]], place: "Constantinople", t: "In Anatolia he joins the household of a Mongol khan's wife and travels with her to Constantinople." },
+      { y: 1334, c: [77.21, 28.61], k: 3.2, via: [[50, 44], [66.9, 39.7], [69.2, 34.5]], place: "Delhi", t: "He crosses the steppe and the Hindu Kush to Delhi, where Sultan Muhammad bin Tughluq makes him a judge." },
+      { y: 1343, c: [73.5, 4.17], k: 3.5, via: [[75, 15]], place: "Maldives", t: "After surviving shipwreck and robbery, he spends about a year as a judge in the Maldives." },
+      { y: 1345, c: [118.59, 24.87], k: 3.5, via: [[80, 7], [97, 5], [104, 1.3]], place: "Quanzhou", t: "He reaches China, under Mongol Yuan rule, landing at the great port of Quanzhou." },
+      { y: 1349, c: [-5.0, 34.03], k: 3.5, via: [[104, 1.3], [80, 7], [56.5, 26], [44.4, 33.3], [31.2, 30], [10, 36.8]], place: "Fez", t: "He returns home through a Middle East ravaged by the Black Death, which has killed his mother." },
+      { y: 1350, c: [-3.6, 37.18], k: 5, place: "Granada", t: "He crosses to Granada, the last Muslim kingdom in Spain." },
+      { y: 1353, c: [-3.0, 16.77], k: 3.5, via: [[-4.0, 31.3], [-6, 23]], place: "Timbuktu", t: "His last journey crosses the Sahara to the Mali Empire, then at its height, and its city of Timbuktu." },
+      { y: 1354, c: [-5.0, 34.03], k: 3.5, via: [[1, 22], [-4.0, 31.3]], place: "Fez", t: "Back in Fez, the sultan has a scholar write down his travels. The book is called the Rihla." },
+    ] },
+    { title: "Magellan and Elcano", blurb: "Five ships sail west to reach the Spice Islands. One ship comes back, the first to sail around the world.", span: "1519–1522", steps: [
+      { y: 1519, c: [-6.35, 36.78], k: 3.5, place: "Sanlúcar de Barrameda", t: "In September 1519, Ferdinand Magellan sails for Spain with five ships and about 270 men, aiming to reach the Spice Islands by sailing west." },
+      { y: 1519, c: [-43.17, -22.9], k: 2.8, via: [[-15.4, 28.1], [-30, 0]], place: "Rio de Janeiro bay", t: "They cross the Atlantic and reach the coast of Brazil in December." },
+      { y: 1520, c: [-67.72, -49.3], k: 3, via: [[-56, -36]], place: "Puerto San Julián", t: "Wintering in Patagonia, Magellan puts down a mutiny. One ship is wrecked scouting the coast." },
+      { y: 1520, c: [-71, -53.5], k: 3.5, place: "Strait of Magellan", t: "In late 1520 they find the passage now named after Magellan. One ship deserts and turns back to Spain." },
+      { y: 1521, c: [144.75, 13.45], k: 2, via: [[-78, -40], [-110, -20], [-160, 0]], place: "Guam", t: "The Pacific crossing takes over three months. Starving men eat leather and sawdust before landing at Guam in March 1521." },
+      { y: 1521, c: [123.97, 10.3], k: 3.5, place: "Mactan, Philippines", t: "In April 1521, Magellan is killed fighting the warriors of the chief Lapulapu on Mactan." },
+      { y: 1521, c: [127.4, 0.68], k: 3.5, via: [[121, 6]], place: "Tidore, Moluccas", t: "In November the survivors reach the Spice Islands and load cloves." },
+      { y: 1522, c: [18.47, -34.36], k: 2.2, via: [[124, -9], [80, -32]], place: "Cape of Good Hope", t: "Juan Sebastián Elcano takes the Victoria home the long way, across the Indian Ocean and around Africa." },
+      { y: 1522, c: [-6.35, 36.78], k: 2.6, via: [[-5, -10], [-23.5, 15]], place: "Sanlúcar de Barrameda", t: "In September 1522, the Victoria returns with 18 of the original crew, after the first voyage around the world." },
+    ] },
+    { title: "Lewis and Clark", blurb: "The Corps of Discovery crosses the continent to the Pacific and back, through lands of dozens of Native nations.", span: "1804–1806", steps: [
+      { y: 1804, c: [-90.2, 38.63], k: 4, place: "St. Louis", t: "In May 1804, months after the Louisiana Purchase, Meriwether Lewis and William Clark head up the Missouri River with about 45 men." },
+      { y: 1804, c: [-101.27, 47.3], k: 3.5, via: [[-96, 41.3]], place: "Fort Mandan", t: "They winter beside the Mandan and Hidatsa villages. Sacagawea, a Shoshone woman, joins them with her husband and newborn son." },
+      { y: 1805, c: [-111.3, 47.5], k: 4, via: [[-104, 48]], place: "Great Falls of the Missouri", t: "Carrying boats and supplies around the Great Falls takes almost a month." },
+      { y: 1805, c: [-113.44, 44.97], k: 5, via: [[-111.5, 45.9]], place: "Lemhi Pass", t: "Crossing the Continental Divide, they meet the Shoshone, whose chief Cameahwait turns out to be Sacagawea's brother. The Shoshone trade them horses." },
+      { y: 1805, c: [-123.88, 46.13], k: 4, via: [[-116, 46.4], [-119, 46]], place: "Fort Clatsop", t: "With help from the Nez Perce, they canoe down to the Columbia and reach the Pacific in November 1805." },
+      { y: 1806, c: [-90.2, 38.63], k: 3, via: [[-119, 46], [-116, 46.4], [-111.3, 47.5], [-101.27, 47.3], [-96, 41.3]], place: "St. Louis", t: "They return to St. Louis in September 1806, having lost only one man, to illness, in over two years." },
+    ] },
+    { title: "Darwin on the Beagle", blurb: "A 22-year-old naturalist sails around the world and gathers the evidence for evolution.", span: "1831–1836", steps: [
+      { y: 1831, c: [-4.14, 50.37], k: 4, place: "Plymouth", t: "In December 1831, 22-year-old Charles Darwin sails on HMS Beagle, a navy ship sent to chart the coasts of South America." },
+      { y: 1832, c: [-38.5, -12.97], k: 2.8, via: [[-23.5, 15]], place: "Salvador, Brazil", t: "He is amazed by the Brazilian rainforest and appalled by the slavery he sees there." },
+      { y: 1832, c: [-68.3, -54.8], k: 3, via: [[-50, -35]], place: "Tierra del Fuego", t: "Digging along the Argentine coast on the way, he finds fossils of giant extinct mammals." },
+      { y: 1835, c: [-71.62, -33.05], k: 3.5, via: [[-75, -50]], place: "Valparaíso", t: "In Chile he crosses the Andes and finds fossil seashells high in the mountains. He also witnesses a great earthquake." },
+      { y: 1835, c: [-90.4, -0.7], k: 4, via: [[-77, -12]], place: "Galápagos Islands", t: "In five weeks on the Galápagos, he collects finches and mockingbirds that differ from island to island." },
+      { y: 1835, c: [-149.5, -17.6], k: 3.5, place: "Tahiti", t: "The Beagle crosses the Pacific to Tahiti." },
+      { y: 1836, c: [151.2, -33.87], k: 3, via: [[174.8, -36.8]], place: "Sydney", t: "After New Zealand, they reach Sydney, then still a British penal colony." },
+      { y: 1836, c: [18.42, -33.92], k: 3, via: [[115, -32], [57.5, -20]], place: "Cape Town", t: "They cross the Indian Ocean by way of Mauritius to Cape Town." },
+      { y: 1836, c: [-5.07, 50.15], k: 3, via: [[-5.7, -15.9], [-38.5, -12.97], [-25.7, 37.7]], place: "Falmouth", t: "After almost five years, the Beagle returns. Darwin publishes On the Origin of Species 23 years later, in 1859." },
+    ] },
+    { title: "Albert Einstein", blurb: "A life that crosses the Kaiser's Germany, Swiss democracy, the rise of the Nazis and an ocean.", span: "1879–1955", steps: [
+      { y: 1879, c: [9.99, 48.4], k: 7, place: "Ulm", t: "Albert Einstein is born in Ulm in 1879, in the Kingdom of Württemberg, part of the new German Empire." },
+      { y: 1880, c: [11.58, 48.14], k: 7, place: "Munich", t: "The next year his family moves to Munich, where his father and uncle start an electrical company." },
+      { y: 1896, c: [8.54, 47.38], k: 7, place: "Zürich", t: "He gives up his German citizenship and studies physics at the Polytechnic in Zürich." },
+      { y: 1905, c: [7.45, 46.95], k: 7, place: "Bern", t: "Working at the patent office in Bern, he publishes four papers in 1905, including special relativity and E = mc²." },
+      { y: 1914, c: [13.4, 52.52], k: 6, place: "Berlin", t: "He moves to Berlin in 1914 and completes his general theory of relativity there in 1915." },
+      { y: 1933, c: [-74.66, 40.35], k: 3, place: "Princeton", t: "When Hitler comes to power in 1933, Einstein, who is Jewish, does not return to Germany. He settles in Princeton, where he lives until his death in 1955." },
+    ] },
+  ];
+  $("journeyList").innerHTML = JOURNEYS.map((t, i) => `
+    <div class="tour-item"><h3>${esc(t.title)} <span class="muted" style="font-family:var(--font-body);font-size:12px;font-weight:500">${esc(t.span)} · ${t.steps.length} stops</span></h3>
+    <p>${esc(t.blurb)}</p><button type="button" class="primary" data-journey="${i}">Start</button></div>`).join("");
+  $("journeyList").querySelectorAll("[data-journey]").forEach(b => b.onclick = () => { $("dlg-journeys").close(); startTour(+b.dataset.journey, true); });
+  function rulerAtLL(ll) {
+    const p = projection(ll); if (!p) return null;
+    let best = null;
+    for (const o of visible) {
+      if (o.rel || !o.path) continue;
+      const b = o.bounds; if (p[0] < b[0][0] || p[0] > b[1][0] || p[1] < b[0][1] || p[1] > b[1][1]) continue;
+      if (hitCtx.isPointInPath(o.path, p[0], p[1]) && (!best || o.area < best.area)) best = o;
+    }
+    return best;
+  }
+  function journeyRoute(steps, upto) {
+    const coords = [];
+    steps.forEach((s, i) => { if (i > upto) return; if (i > 0 && s.via) coords.push(...s.via); coords.push(s.c); });
+    return coords;
+  }
+  function drawJourney() {
+    if (!tour || !tour.journey) return;
+    const steps = tour.t.steps, i = Math.max(0, tour.i), k = transform.k;
+    ctx.save();
+    ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * transform.x, dpr * transform.y);
+    ctx.lineJoin = ctx.lineCap = "round";
+    const all = new Path2D(); d3.geoPath(projection, all)({ type: "LineString", coordinates: journeyRoute(steps, steps.length - 1) });
+    ctx.setLineDash([3 / k, 4 / k]); ctx.strokeStyle = "rgba(233,228,216,0.35)"; ctx.lineWidth = 1.4 / k; ctx.stroke(all);
+    ctx.setLineDash([]);
+    if (i > 0) {
+      const done = new Path2D(); d3.geoPath(projection, done)({ type: "LineString", coordinates: journeyRoute(steps, i) });
+      ctx.strokeStyle = "rgba(10,18,25,0.8)"; ctx.lineWidth = 5 / k; ctx.stroke(done);
+      ctx.strokeStyle = C.brass; ctx.lineWidth = 2.6 / k; ctx.stroke(done);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const family = getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    steps.forEach((s, j) => {
+      const sp = llToScreen(s.c); if (!sp) return;
+      if (j > 0 && steps.slice(0, j).some(q => q.c[0] === s.c[0] && q.c[1] === s.c[1]) && j !== i) return; // repeat stop: one marker
+      const cur = j === i, past = j < i;
+      const r = cur ? 11 : 8;
+      ctx.beginPath(); ctx.arc(sp[0], sp[1], r, 0, Math.PI * 2);
+      ctx.fillStyle = cur ? C.brass : past ? "rgba(217,169,91,0.75)" : "rgba(42,49,56,0.95)"; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = cur ? "#fff4dc" : "rgba(10,18,25,0.9)"; ctx.stroke();
+      ctx.font = `700 ${cur ? 11 : 9.5}px ${family}`;
+      ctx.fillStyle = cur || past ? "#1a1408" : "rgba(233,228,216,0.75)"; ctx.fillText(String(j + 1), sp[0], sp[1] + 0.5);
+      if (cur) {
+        ctx.font = `600 13px ${family}`; ctx.textAlign = "left";
+        ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(10,18,25,0.9)"; ctx.strokeText(s.place, sp[0] + 16, sp[1]);
+        ctx.fillStyle = C.ink; ctx.fillText(s.place, sp[0] + 16, sp[1]); ctx.textAlign = "center";
+      }
+    });
+    ctx.restore();
+  }
+  function showJourneyRuler() {
+    if (!tour || !tour.journey) return;
+    const s = tour.t.steps[tour.i], o = rulerAtLL(s.c), el = $("tourRuler");
+    el.hidden = false;
+    el.innerHTML = o ? `Ruled by <b>${esc(o.label)}</b> in ${esc(fmtS(year))}` : `No state on record here in ${esc(fmtS(year))}`;
+  }
   let tourAnim = 0;
   const REF_SCALE = d3.geoNaturalEarth1().fitExtent([[12, 12], [1388, 640]], { type: "Sphere" }).scale();
   function tourK(k) {
@@ -2477,18 +2621,19 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     const sizeRatio = Math.pow((W * availH) / (1400 * 650), 0.25);
     return Math.max(1, k * sizeRatio * REF_SCALE / projection.scale());
   }
-  function startTour(i) {
+  function startTour(i, journey) {
     exitQuiz(true); closeSpot(); setPick(false); pause();
     selected = null; renderInfo();
-    tour = { t: TOURS[i], i: -1, playing: true, timer: null };
+    const t = (journey ? JOURNEYS : TOURS)[i];
+    tour = { t, i: -1, playing: true, timer: null, journey: !!journey };
     $("tourCard").classList.add("show");
-    track("tour_start", { tour: TOURS[i].title });
+    track(journey ? "journey_start" : "tour_start", { tour: t.title });
     goStep(0);
   }
   function stopTour() {
     if (!tour) return;
     clearTimeout(tour.timer); cancelAnimationFrame(tourAnim);
-    tour = null; $("tourCard").classList.remove("show"); writeHash();
+    tour = null; $("tourCard").classList.remove("show"); writeHash(); draw();
   }
   function tourHold() { if (tour && tour.playing) tourToggle(); }
   function tourToggle() {
@@ -2526,9 +2671,11 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     const n = tour.t.steps.length, s = tour.t.steps[i], first = tour.i < 0;
     tour.i = i;
     delete $("tourPlay").dataset.replay;
-    $("tourKicker").textContent = `Tour · ${tour.t.title} · ${i + 1} of ${n}`;
+    $("tourKicker").textContent = `${tour.journey ? "Journey" : "Tour"} · ${tour.t.title} · ${i + 1} of ${n}`;
     const [num, era] = fmt(s.y);
     $("tourYear").innerHTML = `${num}<small>${era}</small>`;
+    $("tourPlace").hidden = !tour.journey; $("tourPlace").textContent = s.place || "";
+    $("tourRuler").hidden = true;
     $("tourText").textContent = s.t;
     $("tourBar").style.width = ((i + 1) / n * 100) + "%";
     $("tourPrev").disabled = i === 0;
@@ -2538,7 +2685,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     flyTo(s.c, tourK(s.k), first ? 900 : 1400, viewCenterY(phone.matches ? cardH : 0));
     tour.animating = true;
     const dur = first ? 0 : Math.max(700, Math.min(3500, Math.abs(s.y - year) * 6));
-    animYear(s.y, dur, () => { if (!tour) return; tour.animating = false; writeHash(); if (tour.playing) scheduleNext(); });
+    animYear(s.y, dur, () => { if (!tour) return; tour.animating = false; showJourneyRuler(); writeHash(); draw(); if (tour.playing) scheduleNext(); });
   }
   $("tourPrev").onclick = () => { if (tour && tour.i > 0) goStep(tour.i - 1); };
   $("tourNext").onclick = () => { if (!tour) return; if (tour.i + 1 < tour.t.steps.length) goStep(tour.i + 1); else stopTour(); };
