@@ -122,7 +122,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #crumbNote svg { width: 56px; height: 56px; animation: wobble 3.2s ease-in-out infinite; }
 #crumbNote h2 { font-family: var(--font-display); font-weight: 650; font-size: 17px; margin: 0 0 4px; text-wrap: balance; }
 #crumbNote p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
-#crumbNote .row { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+#crumbNote .row { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: space-between; flex-wrap: nowrap; }
 #crumbNote .note-x { position: absolute; top: 6px; right: 6px; border: none; background: none; color: var(--muted); font-size: 20px; line-height: 1; min-height: 0; padding: 4px 8px; }
 #crumbNote .note-x:hover { color: var(--ink); }
 #crumbNote h2 { padding-right: 22px; }
@@ -201,7 +201,6 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     <p>The Sumerians baked flatbread. We'd like just one cookie: Google Analytics, to count visits and see which centuries people explore. No ads, nothing sold.</p>
   </div>
   <div class="row">
-    <button type="button" class="linkbtn" data-open="disclaimer">Read the fine print</button>
     <button type="button" class="note-no" id="crumbNo">No thanks</button>
     <button type="button" class="note-ok" id="crumbOk">Accept all empires</button>
   </div>
