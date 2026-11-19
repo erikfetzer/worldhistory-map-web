@@ -18,5 +18,6 @@ npx -y mapshaper@0.6 "$SRC" \
 npm pack world-atlas@2 --pack-destination "$WORK" >/dev/null
 tar -xzf "$WORK"/world-atlas-*.tgz -C "$WORK"
 cp "$WORK/package/land-50m.json" land.json
+cp "$WORK/package/countries-50m.json" countries.json
 
-echo "Done: borders.json and land.json updated."
+echo "Done: borders.json, land.json and countries.json updated."

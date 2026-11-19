@@ -12,6 +12,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - Pan and zoom (scroll, drag, pinch), hover names, and click for details with Wikipedia/Wikidata links
 - Search for a polity to jump to its time and zoom to it
 - Optional dashed outlines for alliances and overlordships
+- "Today's borders" toggle: overlays modern country outlines and names on any year
 - Shareable year links: `#y117`, `#y-500`
 - Keyboard: Space plays or pauses, ←/→ steps one year, Shift+←/→ jumps to the previous or next change
 
@@ -22,6 +23,7 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 | `index.html` | The whole app (D3 + canvas rendering, loaded from cdnjs/jsDelivr) |
 | `borders.json` | Cliopatria borders as TopoJSON (~16 MB, ~3.7 MB gzipped) |
 | `land.json` | Natural Earth 1:50m land outline from `world-atlas` |
+| `countries.json` | Natural Earth 1:50m country borders from `world-atlas`, for the "Today's borders" overlay (loaded only when toggled on) |
 | `favicon.svg`, `*.png`, `manifest.webmanifest` | Favicon, app icons and the 1200×630 share card (`og.png`) |
 | `scripts/og-card.html` | Renders `og.png`: serve the repo root, open it, screenshot `#card` (add `?year=` to pick a year) |
 | `scripts/build-data.sh` | Rebuilds `borders.json` and `land.json` from the sources |
@@ -41,6 +43,6 @@ Source: https://github.com/Seshat-Global-History-Databank/cliopatria
 
 Changes made: converted to TopoJSON, coordinates quantized, attributes trimmed to Name, FromYear, ToYear, Area, Type, Wikipedia, Wikidata and MemberOf.
 
-The land outline is Natural Earth (public domain) via the `world-atlas` npm package.
+The land outline and today's country borders are Natural Earth (public domain) via the `world-atlas` npm package.
 
 Cliopatria represents one scholarly reading of past territories. Historical borders were often fuzzy or disputed. Report data errors to the Seshat project.

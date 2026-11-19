@@ -94,6 +94,7 @@ select option { background: #16222d; }
 #playBtn { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; min-width: 84px; }
 .controls input[type="number"] { width: 78px; font-variant-numeric: tabular-nums; }
 .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
+.dash-swatch { display: inline-block; width: 18px; height: 0; border-top: 1.5px dashed rgba(240,236,226,0.8); }
 .check { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; }
 .credit { grid-column: 1 / -1; text-align: center; line-height: 1.6; font-size: 11px; color: var(--muted); }
 .credit a { color: var(--muted); }
@@ -321,8 +322,9 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     </div>
     <span class="sep"></span>
     <label class="check"><input type="checkbox" id="showRel"> Alliances &amp; overlords</label>
+    <label class="check"><input type="checkbox" id="showModern"> <span class="dash-swatch" aria-hidden="true"></span>Today's borders</label>
   </div>
-  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · <button type="button" class="linkbtn" data-open="resources">Resources</button> · <button type="button" class="linkbtn" data-open="disclaimer">Disclaimer</button></div>
+  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web</div>
 </div>
 
 <script>
@@ -481,6 +483,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     landPath = new Path2D(); d3.geoPath(projection, landPath)(land);
     gratPath = new Path2D(); d3.geoPath(projection, gratPath)(graticule);
     for (const o of feats) o.path = null;
+    buildModern();
     sizeSpark();
     draw();
   }
@@ -491,11 +494,47 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   let transform = d3.zoomIdentity;
   let selected = null, hovered = null;
   let showRel = false;
+  let showModern = false, modern = null, modernLoading = null;
 
   function computeVisible() {
     visible = feats.filter(o => o.from <= year && year <= o.to && (showRel || !o.rel));
     for (const o of visible) ensure(o);
     visible.sort((a, b) => (a.rel - b.rel) || (b.area - a.area));
+  }
+
+  // ---------- today's borders (Natural Earth 1:50m via world-atlas) ----------
+  function loadModern() {
+    if (modern || modernLoading) return modernLoading;
+    modernLoading = fetch("countries.json").then(r => r.json()).then(t => {
+      const obj = t.objects.countries;
+      modern = {
+        feats: topojson.feature(t, obj).features.filter(f => f.geometry),
+        inner: topojson.mesh(t, obj, (a, b) => a !== b),
+        outer: topojson.mesh(t, obj, (a, b) => a === b),
+      };
+      buildModern(); draw();
+    }).catch(() => {
+      modernLoading = null;
+      $("showModern").checked = false; showModern = false;
+      $("countLabel").textContent = "Today's borders could not load. Try the toggle again.";
+    });
+    return modernLoading;
+  }
+  function buildModern() {
+    if (!modern) return;
+    modern.innerPath = new Path2D(); d3.geoPath(projection, modern.innerPath)(modern.inner);
+    modern.outerPath = new Path2D(); d3.geoPath(projection, modern.outerPath)(modern.outer);
+    modern.labels = modern.feats.map(f => {
+      let target = f, best = -1;
+      if (f.geometry.type === "MultiPolygon") {
+        for (const poly of f.geometry.coordinates) {
+          const pf = { type: "Feature", geometry: { type: "Polygon", coordinates: poly } };
+          const a = geoPath.area(pf);
+          if (a > best) { best = a; target = pf; }
+        }
+      } else best = geoPath.area(f);
+      return { name: f.properties.name, area: best, c: geoPath.centroid(target) };
+    }).filter(l => l.name && isFinite(l.c[0])).sort((a, b) => b.area - a.area);
   }
 
   // ---------- drawing ----------
@@ -538,6 +577,13 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
       ctx.strokeStyle = C.brass; ctx.lineWidth = 2.4 / k; ctx.stroke(selected.path);
     }
     ctx.strokeStyle = "rgba(233,228,216,0.18)"; ctx.lineWidth = 1 / k; ctx.stroke(spherePath);
+    if (showModern && modern) {
+      ctx.strokeStyle = "rgba(240,236,226,0.28)"; ctx.lineWidth = 0.7 / k; ctx.stroke(modern.outerPath);
+      ctx.setLineDash([4 / k, 3 / k]);
+      ctx.strokeStyle = "rgba(10,18,25,0.55)"; ctx.lineWidth = 2.2 / k; ctx.stroke(modern.innerPath);
+      ctx.strokeStyle = "rgba(240,236,226,0.85)"; ctx.lineWidth = 1 / k; ctx.stroke(modern.innerPath);
+      ctx.setLineDash([]);
+    }
 
     // labels in screen space
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -557,6 +603,27 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
       boxes.push(b);
       ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.7)"; ctx.strokeText(o.label, sx, sy);
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
+    }
+
+    // today's country names: small italic caps, fitted around the historical labels
+    if (showModern && modern && modern.labels) {
+      const family = getComputedStyle(document.body).fontFamily;
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "1px";
+      for (const l of modern.labels) {
+        const sx = l.c[0] * k + transform.x, sy = l.c[1] * k + transform.y;
+        if (sx < -50 || sx > W + 50 || sy < -20 || sy > H + 20) continue;
+        const text = l.name.toUpperCase();
+        const size = Math.min(12, (Math.sqrt(l.area) * k * 0.9) / (text.length * 0.72));
+        if (size < 8) continue;
+        ctx.font = `italic 500 ${size.toFixed(1)}px ${family}`;
+        const w = ctx.measureText(text).width, h = size * 1.3;
+        const b = [sx - w / 2 - 2, sy - h / 2, sx + w / 2 + 2, sy + h / 2];
+        if (boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]))) continue;
+        boxes.push(b);
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.75)"; ctx.strokeText(text, sx, sy);
+        ctx.fillStyle = "rgba(240,236,226,0.82)"; ctx.fillText(text, sx, sy);
+      }
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
     }
   }
 
@@ -790,6 +857,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   $("searchInput").addEventListener("input", () => $("searchInput").setCustomValidity(""));
 
   $("showRel").addEventListener("change", (e) => { showRel = e.target.checked; computeVisible(); draw(); });
+  $("showModern").addEventListener("change", (e) => { showModern = e.target.checked; if (showModern) loadModern(); draw(); });
 
   window.addEventListener("keydown", (e) => {
     if (document.querySelector("dialog[open]")) return;
