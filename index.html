@@ -85,14 +85,14 @@ select option { background: #16222d; }
 #spark { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 34px; }
 #slider { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; margin: 0; accent-color: var(--brass); height: 20px; }
 .ticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: -2px; }
-.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; grid-column: 1 / -1; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 4px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; grid-column: 1 / -1; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 4px; }
 .controls .group { display: flex; gap: 6px; align-items: center; }
 .controls label { color: var(--muted); font-size: 12px; }
 #playBtn { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; min-width: 84px; }
 .controls input[type="number"] { width: 78px; font-variant-numeric: tabular-nums; }
 .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
 .check { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; }
-.credit { margin-left: auto; font-size: 11px; color: var(--muted); }
+.credit { grid-column: 1 / -1; text-align: center; line-height: 1.6; font-size: 11px; color: var(--muted); }
 .credit a { color: var(--muted); }
 
 .brand .links { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; }
@@ -127,8 +127,12 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--font-display); font-size: 22px; color: var(--muted); background: var(--void); }
 
 @media (max-width: 760px) {
-  .brand p, .credit { display: none; }
-  #cookie { left: 8px; right: 8px; top: auto; bottom: 236px; width: auto; }
+  .brand p { display: none; }
+  #cookie { left: 8px; right: 8px; top: auto; bottom: var(--dockH, 380px); width: auto; }
+  .dock > * { min-width: 0; }
+  .controls .group { flex-wrap: wrap; justify-content: center; }
+  .controls { gap: 8px 10px; }
+  .ticks span:nth-child(2), .ticks span:nth-child(4) { display: none; }
   .top { flex-direction: column; }
   .search input { width: 100%; }
   .search { width: 100%; }
@@ -136,7 +140,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   .yearbox { grid-row: auto; display: flex; align-items: baseline; gap: 10px; }
   #yearLabel { font-size: 30px; }
   .sep { display: none; }
-  #info { top: auto; bottom: 230px; left: 8px; right: 8px; width: auto; }
+  #info { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 40vh; overflow-y: auto; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -293,8 +297,8 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     </div>
     <span class="sep"></span>
     <label class="check"><input type="checkbox" id="showRel"> Alliances &amp; overlords</label>
-    <span class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · <button type="button" class="linkbtn" data-open="resources">Resources</button> · <button type="button" class="linkbtn" data-open="disclaimer">Disclaimer</button></span>
   </div>
+  <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web · <button type="button" class="linkbtn" data-open="resources">Resources</button> · <button type="button" class="linkbtn" data-open="disclaimer">Disclaimer</button></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
@@ -404,6 +408,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
     W = window.innerWidth; H = window.innerHeight;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     const dockH = document.querySelector(".dock").offsetHeight + 24;
+    document.documentElement.style.setProperty("--dockH", (dockH - 8) + "px");
     projection.fitExtent([[12, 12], [W - 12, Math.max(200, H - dockH)]], { type: "Sphere" });
     spherePath = new Path2D(); d3.geoPath(projection, spherePath)({ type: "Sphere" });
     landPath = new Path2D(); d3.geoPath(projection, landPath)(land);
