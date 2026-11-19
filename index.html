@@ -755,6 +755,21 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     }
   }
   let windingChecked = false;
+  // Autonomous regions and overseas territories: [name, lon0, lat0, lon1, lat1]
+  const TERRITORIES = [
+    ["Greenland", -74, 59, -10, 84], ["Faroe Islands", -7.8, 61.3, -6.1, 62.5], ["Svalbard", 10, 76, 34, 81],
+    ["Åland", 19.3, 59.7, 21.3, 60.6], ["Azores", -31.5, 36.8, -24.8, 39.8], ["Madeira", -17.4, 32.5, -16.2, 33.2],
+    ["Puerto Rico", -67.5, 17.8, -65.2, 18.6], ["Guam", 144.5, 13.2, 145, 13.7], ["Northern Mariana Islands", 145, 14, 146.2, 20.6],
+    ["American Samoa", -171, -14.6, -168, -11], ["U.S. Virgin Islands", -65.1, 17.6, -64.5, 18.45],
+    ["French Guiana", -54.7, 2, -51.5, 6], ["New Caledonia", 163, -23, 168.5, -19.5], ["French Polynesia", -155, -28, -134, -7],
+    ["Réunion", 55.1, -21.5, 55.9, -20.8], ["Guadeloupe", -61.9, 15.8, -61, 16.6], ["Martinique", -61.3, 14.3, -60.8, 14.9],
+    ["Hong Kong", 113.8, 22.1, 114.5, 22.6], ["Falkland Islands", -61.5, -52.5, -57.5, -50.9], ["Bermuda", -65, 32.2, -64.6, 32.5],
+  ];
+  function territoryOf(pf) {
+    const [lon, lat] = d3.geoCentroid(pf);
+    for (const t of TERRITORIES) if (lon >= t[1] && lon <= t[3] && lat >= t[2] && lat <= t[4]) return { name: t[0] };
+    return null;
+  }
   function ensure(o) {
     if (o.path) return o;
     if (!o.checked) { fixWinding(o.f); o.checked = true; }
@@ -763,16 +778,27 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     o.path = p;
     o.bounds = geoPath.bounds(o.f);
     o.area = geoPath.area(o.f);
-    // label anchor: centroid of the largest part
+    // label anchor: centroid of the largest part that isn't an autonomous or overseas territory;
+    // territory parts get their own two-line label (sovereign, then the territory's name)
     let target = o.f;
+    o.subs = null;
     if (o.f.geometry.type === "MultiPolygon") {
-      let best = null, ba = -1;
+      let best = null, ba = -1, bestAny = null, baAny = -1;
+      const subs = new Map();
       for (const poly of o.f.geometry.coordinates) {
         const pf = { type: "Feature", geometry: { type: "Polygon", coordinates: poly } };
         const a = geoPath.area(pf);
+        if (a > baAny) { baAny = a; bestAny = pf; }
+        const terr = territoryOf(pf);
+        if (terr) {
+          const cur = subs.get(terr.name);
+          if (!cur || a > cur.area) subs.set(terr.name, { name: terr.name, area: a, centroid: geoPath.centroid(pf) });
+          continue;
+        }
         if (a > ba) { ba = a; best = pf; }
       }
-      target = best; o.labelArea = ba;
+      if (best) { target = best; o.labelArea = ba; } else { target = bestAny; o.labelArea = baAny; subs.clear(); }
+      if (subs.size) o.subs = [...subs.values()];
     } else o.labelArea = o.area;
     o.centroid = geoPath.centroid(target);
     return o;
@@ -1466,6 +1492,36 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       boxes.push(b);
       ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.7)"; ctx.strokeText(o.label, sx, sy);
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
+    }
+    // territories: sovereign's name, with the territory's own name smaller beneath
+    const subCand = [];
+    for (const o of cand) if (o.subs) for (const sb of o.subs) subCand.push({ o, sb });
+    subCand.sort((a, b) => b.sb.area - a.sb.area);
+    for (const { o, sb } of subCand) {
+      const sx = sb.centroid[0] * k + transform.x, sy = sb.centroid[1] * k + transform.y;
+      if (sx < -50 || sx > W + 50 || sy < -20 || sy > H + 20) continue;
+      const lin = Math.sqrt(sb.area) * k;
+      const longest = Math.max(o.label.length, sb.name.length * 0.8);
+      let size = Math.min(18, (lin * 0.95) / (longest * 0.56));
+      if (size < 9 && lin >= 22) size = 9.5; // small islands: let the label run past the coast
+      if (size < 9) continue;
+      const sub = Math.max(8, size * 0.72);
+      const fam = getComputedStyle(document.body).fontFamily;
+      ctx.font = `600 ${size.toFixed(1)}px ${fam}`;
+      const w1 = ctx.measureText(o.label).width;
+      ctx.font = `italic 500 ${sub.toFixed(1)}px ${fam}`;
+      const w2 = ctx.measureText(sb.name).width;
+      const w = Math.max(w1, w2), h = size * 1.15 + sub * 1.2;
+      const y1 = sy - h / 2 + size * 0.6, y2 = y1 + size * 0.55 + sub * 0.75;
+      const b = [sx - w / 2 - 2, sy - h / 2, sx + w / 2 + 2, sy + h / 2];
+      if (boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]))) continue;
+      boxes.push(b);
+      ctx.font = `600 ${size.toFixed(1)}px ${fam}`;
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.7)"; ctx.strokeText(o.label, sx, y1);
+      ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, y1);
+      ctx.font = `italic 500 ${sub.toFixed(1)}px ${fam}`;
+      ctx.strokeText(sb.name, sx, y2);
+      ctx.fillStyle = "rgba(233,228,216,0.78)"; ctx.fillText(sb.name, sx, y2);
     }
 
     if (!quiz) for (const d of disputedIn(sceneYear)) {
