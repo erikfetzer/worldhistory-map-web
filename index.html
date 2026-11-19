@@ -178,6 +178,42 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #infoMore .more { margin-top: 4px; font-size: 12px; }
 #info .links button.linkbtn { font-size: 13px; }
 
+/* largest-right-now ranking */
+#leaders { left: 16px; top: 200px; width: 380px; overflow-y: auto; padding: 14px 16px; display: none; }
+#leaders.show { display: block; }
+#leaders h2 { font-size: 22px; font-variant-numeric: tabular-nums; }
+#leadList { list-style: none; margin: 8px 0 6px; padding: 0; display: grid; gap: 2px; }
+#leadList button { width: 100%; display: grid; grid-template-columns: 22px 1fr auto; grid-template-rows: auto 6px; gap: 3px 8px; align-items: center; text-align: left; background: none; border: 1px solid transparent; padding: 5px 6px; min-height: 0; font-size: 13px; }
+#leadList button:hover { border-color: var(--line); background: rgba(255,255,255,0.04); }
+#leadList .rank { color: var(--muted); font-variant-numeric: tabular-nums; grid-row: span 2; text-align: right; }
+#leadList .bar { grid-column: 2 / 4; height: 6px; border-radius: 3px; background: rgba(233,228,216,0.08); overflow: hidden; }
+#leadList .bar i { display: block; height: 100%; border-radius: 3px; }
+#leadNote { font-size: 11px; }
+
+/* rise-and-fall graph in the details card */
+#infoChart { margin: 6px 0 2px; }
+#infoChart svg { width: 100%; height: 86px; display: block; cursor: pointer; }
+#infoChart .cap { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#infoChart:empty { display: none; }
+
+/* compare two years */
+.cmp-row { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 6px 0 2px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.cmp-row[hidden] { display: none; }
+.cmp-row input[type="range"] { flex: 1; accent-color: #8fb8d8; }
+.cmp-row b { color: var(--ink); font-family: var(--font-display); font-size: 18px; min-width: 96px; font-variant-numeric: tabular-nums; }
+.cmp-row b small { font-family: var(--font-body); font-size: 11px; color: #8fb8d8; margin-left: 3px; }
+.cmp-row .cmp-x { min-height: 0; padding: 4px 10px; }
+.cmp-tag { color: #8fb8d8; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; }
+
+/* recording */
+#recBtn.rec { background: #b8463d; border-color: #b8463d; color: #fff; }
+#clipPanel { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 32px)); padding: 16px 18px; display: none; z-index: 7; max-height: calc(100% - 32px); overflow-y: auto; }
+#clipPanel.show { display: block; }
+#clipPanel video { width: 100%; border-radius: 8px; background: #000; display: block; margin: 8px 0; max-height: 50vh; }
+#clipPanel .row { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; align-items: center; }
+#clipPanel .row .muted { margin-right: auto; font-size: 12px; }
+#clipPanel a.primary { text-decoration: none; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--brass); }
+
 /* daily quiz */
 body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode #spot, body.quiz-mode #tourCard, body.quiz-mode #tip, body.quiz-mode #crumbNote { display: none !important; }
 #quiz { left: 50%; transform: translateX(-50%); bottom: 16px; width: min(640px, calc(100% - 32px)); padding: 16px 18px; display: none; max-height: calc(100% - 32px); overflow-y: auto; }
@@ -246,6 +282,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   .sep { display: none; }
   #info { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 40vh; overflow-y: auto; }
   #spot { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 45vh; }
+  #leaders { top: auto; bottom: var(--dockH, 380px); left: 8px; right: 8px; width: auto; max-height: 45vh; }
+  .cmp-row { gap: 8px; }
+  .cmp-row .cmp-tag { display: none; }
+  .cmp-row b { min-width: 74px; font-size: 16px; }
   #tourCard { left: 8px; right: 8px; width: auto; bottom: var(--dockH, 380px); }
   #quiz { bottom: 8px; width: calc(100% - 16px); padding: 14px; }
   #quiz h2 { font-size: 19px; }
@@ -267,6 +307,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       <button type="button" class="pill" data-open="tours">Tours</button>
       <button type="button" class="pill" id="openQuiz">Daily quiz</button>
       <button type="button" class="pill" id="pickSpot" aria-pressed="false" title="Or right-click / long-press any spot">Who ruled here?</button>
+      <button type="button" class="pill" id="openLeaders" aria-pressed="false">Largest empires</button>
+      <button type="button" class="pill" id="openCompare" aria-pressed="false">Compare years</button>
     </div>
     <div class="links">
       <button type="button" class="linkbtn" data-open="resources">Resources &amp; sources</button>
@@ -284,6 +326,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   <button class="close" id="infoClose" aria-label="Close details">×</button>
   <h2 id="infoName"></h2>
   <dl id="infoDl"></dl>
+  <div id="infoChart"></div>
   <div id="infoMore"></div>
   <div class="links" id="infoLinks"></div>
 </div>
@@ -298,6 +341,22 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   <svg id="spotStrip" preserveAspectRatio="none" role="img" aria-label="Timeline of rulers at this spot; click to jump to a year"></svg>
   <div class="strip-ticks"><span>3400 BCE</span><span>1 CE</span><span>2024 CE</span></div>
   <ol id="spotList"></ol>
+</section>
+
+<section id="leaders" class="panel" aria-label="Largest empires right now">
+  <button type="button" class="x" id="leadersClose" aria-label="Close">×</button>
+  <div class="kicker">Largest right now</div>
+  <h2 id="leadYear"></h2>
+  <ol id="leadList"></ol>
+  <div id="leadNote" class="muted">Ranked by land area in the Cliopatria data. Press Play to watch empires overtake each other.</div>
+</section>
+
+<section id="clipPanel" class="panel" aria-label="Your recorded clip">
+  <button type="button" class="x" id="clipClose" aria-label="Close">×</button>
+  <div class="kicker">Your clip</div>
+  <h2 id="clipTitle">Recording ready</h2>
+  <video id="clipVideo" controls playsinline muted></video>
+  <div class="row"><span class="muted" id="clipInfo"></span><button type="button" id="clipShare" hidden>Share</button><a class="primary" id="clipDownload" href="#">Download video</a></div>
 </section>
 
 <section id="quiz" class="panel" aria-live="polite" aria-label="Daily quiz"></section>
@@ -417,6 +476,13 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     </div>
     <div class="ticks"><span>3400 BCE</span><span>2000 BCE</span><span>1000 BCE</span><span>1 CE</span><span>1000 CE</span><span>2024 CE</span></div>
   </div>
+  <div class="cmp-row" id="cmpRow" hidden>
+    <span class="cmp-tag">Right side</span>
+    <b id="cmpLabel"></b>
+    <input type="range" id="cmpSlider" min="-3400" max="2024" step="1" value="1920" aria-label="Year shown on the right side of the divider">
+    <button type="button" class="cmp-x" id="cmpSwap" title="Swap the two years">⇄</button>
+    <button type="button" class="cmp-x" id="cmpClose" aria-label="Stop comparing">×</button>
+  </div>
   <div class="controls" id="dockMore">
     <div class="group">
       <button id="prevChange" title="Previous border change (Shift+←)" aria-label="Previous border change">⇤</button>
@@ -458,6 +524,12 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     </div>
     <span class="sep"></span>
     <label class="check"><input type="checkbox" id="showRel"> Alliances &amp; overlords</label>
+    <span class="sep"></span>
+    <div class="group">
+      <button type="button" id="shareLink" title="Copy a link to this exact view">Copy link</button>
+      <button type="button" id="recBtn" title="Record the play range as a video">● Record clip</button>
+    </div>
+    <span class="sep"></span>
     <label class="check"><input type="checkbox" id="showModern"> <span class="dash-swatch" aria-hidden="true"></span>Today's borders</label>
   </div>
   <div class="credit">Borders: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria">Cliopatria</a> (Seshat), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, simplified for web</div>
@@ -619,6 +691,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     landPath = new Path2D(); d3.geoPath(projection, landPath)(land);
     gratPath = new Path2D(); d3.geoPath(projection, gratPath)(graticule);
     for (const o of feats) o.path = null;
+    if (compare) { compare.x = Math.min(compare.x, W); compare.visibleB = listFor(compare.yearB); }
     buildModern();
     sizeSpark();
     draw();
@@ -631,7 +704,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   let selected = null, hovered = null;
   let showRel = false;
   let showModern = false, modern = null, modernLoading = null;
-  let spot = null, quiz = null, tour = null, pickMode = false, lastClickLL = null;
+  let spot = null, quiz = null, tour = null, pickMode = false, lastClickLL = null, compare = null;
   const extraResolved = new Map();
 
   function computeVisible() {
@@ -682,9 +755,22 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     requestAnimationFrame(() => { drawQueued = false; drawNow(); });
   }
   function drawNow() {
-    const k = transform.k;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = C.void; ctx.fillRect(0, 0, W, H);
+    if (compare) {
+      const dx = Math.round(compare.x);
+      drawScene(visible, [0, 0, dx, H]);
+      drawScene(compare.visibleB, [dx, 0, W - dx, H]);
+      drawCompareChrome(dx);
+    } else {
+      drawScene(visible, null);
+    }
+    drawPins();
+  }
+  function drawScene(list, clip) {
+    ctx.save();
+    if (clip) { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.beginPath(); ctx.rect(clip[0], clip[1], clip[2], clip[3]); ctx.clip(); }
+    const k = transform.k;
     ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * transform.x, dpr * transform.y);
     ctx.fillStyle = C.sea; ctx.fill(spherePath);
     ctx.strokeStyle = "rgba(233,228,216,0.05)"; ctx.lineWidth = 0.6 / k; ctx.stroke(gratPath);
@@ -695,14 +781,14 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     const inView = (b) => !(b[1][0] < x0 || b[0][0] > x1 || b[1][1] < y0 || b[0][1] > y1);
 
     ctx.lineJoin = "round";
-    for (const o of visible) {
+    for (const o of list) {
       if (o.rel || !inView(o.bounds)) continue;
       ctx.globalAlpha = quizTarget() && o !== quizTarget() ? 0.42 : 0.86; ctx.fillStyle = o.color; ctx.fill(o.path);
       ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(10,18,25,0.85)"; ctx.lineWidth = 0.9 / k; ctx.stroke(o.path);
     }
     if (showRel) {
       ctx.setLineDash([5 / k, 4 / k]);
-      for (const o of visible) {
+      for (const o of list) {
         if (!o.rel || !inView(o.bounds)) continue;
         ctx.strokeStyle = o.color; ctx.lineWidth = 2 / k; ctx.stroke(o.path);
       }
@@ -713,10 +799,10 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.strokeStyle = "rgba(10,18,25,0.9)"; ctx.lineWidth = 5 / k; ctx.stroke(qt.path);
       ctx.strokeStyle = C.brass; ctx.lineWidth = 2.6 / k; ctx.stroke(qt.path);
     }
-    if (!quiz && hovered && hovered !== selected && visible.includes(hovered)) {
+    if (!quiz && hovered && hovered !== selected && list.includes(hovered)) {
       ctx.strokeStyle = "rgba(233,228,216,0.75)"; ctx.lineWidth = 1.4 / k; ctx.stroke(hovered.path);
     }
-    if (selected && visible.includes(selected)) {
+    if (selected && list.includes(selected)) {
       ctx.strokeStyle = C.brass; ctx.lineWidth = 2.4 / k; ctx.stroke(selected.path);
     }
     ctx.strokeStyle = "rgba(233,228,216,0.18)"; ctx.lineWidth = 1 / k; ctx.stroke(spherePath);
@@ -732,7 +818,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     const boxes = [];
-    const cand = (quiz ? (quiz.revealed && qt ? [qt] : []) : visible).filter(o => !o.rel && o.centroid && isFinite(o.centroid[0])).sort((a, b) => b.labelArea - a.labelArea);
+    const cand = (quiz ? (quiz.revealed && qt ? [qt] : []) : list).filter(o => !o.rel && o.centroid && isFinite(o.centroid[0])).sort((a, b) => b.labelArea - a.labelArea);
     for (const o of cand) {
       const sx = o.centroid[0] * k + transform.x, sy = o.centroid[1] * k + transform.y;
       if (sx < -50 || sx > W + 50 || sy < -20 || sy > H + 20) continue;
@@ -768,7 +854,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       }
       if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
     }
-    drawPins();
+    ctx.restore();
   }
 
   // ---------- sparkline ----------
@@ -822,6 +908,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       renderInfo();
     }
     if (spot && spot.bands) renderSpot();
+    if (leadersOpen) renderLeaders();
     drawSpark();
     draw();
   }
@@ -866,6 +953,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     requestAnimationFrame(tick);
   }
   function pause() {
+    if (rec && !rec.stopping && playing) { stopRecording(); return; }
     if (!playing) return;
     playing = false; playBtn.textContent = "▶ Play"; $("miniPlay").textContent = "▶"; $("miniPlay").setAttribute("aria-label", "Play"); writeHash();
   }
@@ -918,7 +1006,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     const bx = (cx - transform.x) / transform.k, by = (cy - transform.y) / transform.k;
     // smallest polity first so enclaves win
     let best = null;
-    for (const o of visible) {
+    const list = compare && cx > compare.x ? compare.visibleB : visible;
+    for (const o of list) {
       if (o.rel) continue;
       const b = o.bounds;
       if (bx < b[0][0] || bx > b[1][0] || by < b[0][1] || by > b[1][1]) continue;
@@ -931,6 +1020,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   let lpTimer = null, lpFired = false, pointers = 0;
   canvas.addEventListener("pointerdown", (e) => {
     pointers++;
+    if (compare && Math.abs(e.clientX - compare.x) < 22) { downAt = null; return; } // dragging the compare divider
     downAt = [e.clientX, e.clientY];
     clearTimeout(lpTimer); lpTimer = null;
     if (e.pointerType !== "mouse" && pointers === 1 && !quiz) {
@@ -949,6 +1039,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   canvas.addEventListener("pointercancel", () => { endPointer(); downAt = null; lpFired = false; });
   canvas.addEventListener("pointerup", (e) => {
     endPointer();
+    if (draggingDivider) { downAt = null; return; }
     if (lpFired) { lpFired = false; downAt = null; return; }
     if (!downAt) return;
     const moved = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]);
@@ -968,7 +1059,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   });
   let hoverQueued = false, lastMove = null;
   canvas.addEventListener("pointermove", (e) => {
-    if (e.pointerType !== "mouse" || quiz) return;
+    if (e.pointerType !== "mouse" || quiz || rec || draggingDivider) return;
     lastMove = e;
     if (hoverQueued) return; hoverQueued = true;
     requestAnimationFrame(() => {
@@ -986,7 +1077,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
 
   function renderInfo() {
     const box = $("info");
-    if (!selected) { box.classList.remove("show"); $("infoMore").innerHTML = ""; return; }
+    if (!selected) { box.classList.remove("show"); $("infoMore").innerHTML = ""; $("infoChart").innerHTML = ""; return; }
     const o = selected, s = spans.get(o.name), p = o.p;
     $("infoName").innerHTML = `<span class="swatch" style="background:${o.color}"></span>`;
     $("infoName").appendChild(document.createTextNode(o.label));
@@ -1007,6 +1098,9 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       const sb = document.createElement("a"); sb.href = "#"; sb.textContent = "Who ruled this spot?";
       const ll = lastClickLL; sb.onclick = (e) => { e.preventDefault(); openSpot(ll); }; links.appendChild(sb);
     }
+    const cl = document.createElement("a"); cl.href = "#"; cl.textContent = "Copy link";
+    cl.onclick = (e) => { e.preventDefault(); copyLink(); }; links.appendChild(cl);
+    renderChart(o);
     renderExtra(o);
     box.classList.add("show");
   }
@@ -1037,7 +1131,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   });
   $("searchInput").addEventListener("input", () => $("searchInput").setCustomValidity(""));
 
-  $("showRel").addEventListener("change", (e) => { showRel = e.target.checked; computeVisible(); draw(); });
+  $("showRel").addEventListener("change", (e) => { showRel = e.target.checked; computeVisible(); if (compare) compare.visibleB = listFor(compare.yearB); draw(); });
   $("showModern").addEventListener("change", (e) => { showModern = e.target.checked; if (showModern) loadModern(); draw(); });
 
   window.addEventListener("keydown", (e) => {
@@ -1205,6 +1299,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
 
   function openSpot(ll) {
     setPick(false);
+    if (leadersOpen) setLeaders(false);
     spot = { ll, bands: null, today: null };
     if (phone.matches) { selected = null; renderInfo(); }
     if (!phone.matches) {
@@ -1715,10 +1810,285 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   $("tourExit").onclick = stopTour;
 
 
-  // ---------- shareable year via #y117 / #y-500 ----------
-  function writeHash() { try { history.replaceState(null, "", "#y" + year); } catch (e) {} }
-  function readHash() { const m = /^#y(-?\d+)$/.exec(location.hash); return m ? +m[1] : null; }
-  window.addEventListener("hashchange", () => { const y = readHash(); if (y !== null) setYear(y, 1); });
+  // =====================================================================
+  // 5. Rise-and-fall graph + "largest right now" ranking
+  // =====================================================================
+  const fmtArea = (a) => a >= 1e6 ? (a / 1e6).toFixed(a >= 1e7 ? 1 : 2) + "M km²" : a >= 1e4 ? Math.round(a / 1e3) + "K km²" : Math.round(a).toLocaleString() + " km²";
+  function renderChart(o) {
+    const box = $("infoChart"), s = spans.get(o.name);
+    const rows = s.rows.filter(r => r.p.Area > 0).sort((a, b) => a.from - b.from);
+    if (rows.length < 2 || s.to - s.from < 2) { box.innerHTML = ""; return; }
+    const Wd = 300, Hh = 86, pad = 4;
+    const max = Math.max(...rows.map(r => r.p.Area));
+    const x = (y) => pad + (y - s.from) / (s.to + 1 - s.from) * (Wd - 2 * pad);
+    const yv = (a) => Hh - 2 - (a / max) * (Hh - 14);
+    let d = `M${x(rows[0].from).toFixed(1)},${Hh - 2}`;
+    for (const r of rows) d += `L${x(r.from).toFixed(1)},${yv(r.p.Area).toFixed(1)}L${x(r.to + 1).toFixed(1)},${yv(r.p.Area).toFixed(1)}`;
+    d += `L${x(rows[rows.length - 1].to + 1).toFixed(1)},${Hh - 2}Z`;
+    const peak = rows.reduce((a, b) => (b.p.Area > a.p.Area ? b : a));
+    const inSpan = year >= s.from && year <= s.to;
+    box.innerHTML = `<svg viewBox="0 0 ${Wd} ${Hh}" preserveAspectRatio="none" role="img" aria-label="Territory over time; click to jump to a year">
+        <line x1="0" x2="${Wd}" y1="${Hh - 2}" y2="${Hh - 2}" stroke="rgba(233,228,216,0.2)"/>
+        <path d="${d}" fill="${o.color}" fill-opacity="0.55" stroke="${o.color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        ${inSpan ? `<line x1="${x(year).toFixed(1)}" x2="${x(year).toFixed(1)}" y1="0" y2="${Hh}" stroke="${C.brass}" stroke-width="2" vector-effect="non-scaling-stroke"/>` : ""}
+      </svg>
+      <div class="cap"><span>${esc(fmtS(s.from))}</span><span>Peak ${esc(fmtArea(peak.p.Area))}, ${esc(fmtS(peak.from))}</span><span>${esc(fmtS(s.to))}</span></div>`;
+    box.querySelector("svg").onclick = (e) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      const y = Math.round(s.from + ((e.clientX - r.left) / r.width * Wd - pad) / (Wd - 2 * pad) * (s.to + 1 - s.from));
+      pause(); tourHold(); setYear(Math.max(s.from, Math.min(s.to, y)), 1); writeHash();
+    };
+  }
+
+  let leadersOpen = false;
+  function setLeaders(on) {
+    leadersOpen = on;
+    $("openLeaders").setAttribute("aria-pressed", String(on));
+    $("leaders").classList.toggle("show", on);
+    if (on) {
+      closeSpot();
+      if (!phone.matches) {
+        const top = Math.round(document.querySelector(".brand").getBoundingClientRect().bottom + 10);
+        $("leaders").style.top = top + "px";
+        $("leaders").style.maxHeight = `calc(100% - ${top + 8}px - var(--dockH, 200px))`;
+      } else { $("leaders").style.top = ""; $("leaders").style.maxHeight = ""; }
+      renderLeaders();
+      track("leaders_open");
+    }
+  }
+  function renderLeaders() {
+    if (!leadersOpen) return;
+    const [n, era] = fmt(year);
+    $("leadYear").innerHTML = `${n} <span class="muted" style="font-family:var(--font-body);font-size:13px">${era}</span>`;
+    const seen = new Set(), top = [];
+    for (const o of visible.filter(o => !o.rel && o.p.Area > 0).sort((a, b) => b.p.Area - a.p.Area)) {
+      if (seen.has(o.label)) continue; seen.add(o.label); top.push(o);
+      if (top.length === 10) break;
+    }
+    const max = top.length ? top[0].p.Area : 1;
+    $("leadList").innerHTML = top.map((o, i) => `<li><button type="button" data-lead="${i}">
+        <span class="rank">${i + 1}</span><span>${esc(o.label)}</span><span class="yrs">${esc(fmtArea(o.p.Area))}</span>
+        <span class="bar"><i style="width:${(o.p.Area / max * 100).toFixed(1)}%;background:${o.color}"></i></span></button></li>`).join("")
+      || `<li class="muted">No states are recorded in this year.</li>`;
+    $("leadList").querySelectorAll("[data-lead]").forEach(b => b.onclick = () => {
+      const o = top[+b.dataset.lead]; pause(); tourHold();
+      selected = o; lastClickLL = null; renderInfo(); zoomTo(o); draw(); writeHash();
+    });
+  }
+  $("openLeaders").onclick = () => setLeaders(!leadersOpen);
+  $("leadersClose").onclick = () => setLeaders(false);
+
+  // =====================================================================
+  // 6. Compare two years with a draggable divider
+  // =====================================================================
+  const CMP = "#8fb8d8";
+  function listFor(y) {
+    const l = feats.filter(o => o.from <= y && y <= o.to && (showRel || !o.rel));
+    for (const o of l) ensure(o);
+    return l.sort((a, b) => (a.rel - b.rel) || (b.area - a.area));
+  }
+  function setCompareYear(y) {
+    if (!compare) return;
+    y = Math.max(MIN_Y, Math.min(MAX_Y, Math.round(y))); if (y === 0) y = 1;
+    compare.yearB = y; compare.visibleB = listFor(y);
+    $("cmpSlider").value = y;
+    const [n, era] = fmt(y); $("cmpLabel").innerHTML = `${n}<small>${era}</small>`;
+    draw();
+  }
+  function setCompare(on, yB) {
+    if (on) {
+      exitQuiz(true); stopTour();
+      const def = yB ?? (year < 1900 ? Math.min(MAX_Y, year + 200) : 2024);
+      compare = { x: W / 2, yearB: def, visibleB: [] };
+      $("cmpRow").hidden = false;
+      setCompareYear(def);
+      track("compare_open");
+    } else {
+      compare = null; $("cmpRow").hidden = true;
+    }
+    $("openCompare").setAttribute("aria-pressed", String(!!compare));
+    resize(); computeVisible(); draw(); writeHash();
+  }
+  function drawCompareChrome(dx) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "rgba(10,18,25,0.9)"; ctx.fillRect(dx - 2, 0, 4, H);
+    ctx.fillStyle = C.ink; ctx.fillRect(dx - 1, 0, 2, H);
+    const cy = Math.max(120, viewCenterY());
+    ctx.beginPath(); ctx.arc(dx, cy, 16, 0, Math.PI * 2); ctx.fillStyle = C.ink; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "#0a1219"; ctx.stroke();
+    ctx.fillStyle = "#0a1219"; ctx.font = `700 13px ${getComputedStyle(document.body).fontFamily}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("‹ ›", dx, cy + 1);
+    const tag = (text, x, align, color) => {
+      ctx.font = `650 22px ${getComputedStyle(document.documentElement).getPropertyValue("--font-display")}`;
+      ctx.textAlign = align; ctx.textBaseline = "middle";
+      const w = ctx.measureText(text).width + 20, bx = align === "right" ? x - w : x;
+      const ty = phone.matches ? cy + 30 : 18; // desktop: top strip between the title box and search
+      ctx.fillStyle = "rgba(14,22,30,0.92)"; ctx.fillRect(bx, ty, w, 36);
+      ctx.fillStyle = color; ctx.fillRect(bx, ty + 33, w, 3);
+      ctx.fillStyle = C.ink; ctx.fillText(text, align === "right" ? x - 10 : x + 10, ty + 18);
+    };
+    if (dx > 90) tag(fmtS(year), dx - 10, "right", C.brass);
+    if (W - dx > 90) tag(fmtS(compare.yearB), dx + 10, "left", CMP);
+    ctx.textBaseline = "alphabetic";
+  }
+  // let the divider be dragged instead of panning the map
+  const nearDivider = (e) => compare && Math.abs((e.clientX ?? e.touches?.[0]?.clientX ?? -999) - compare.x) < 22;
+  zoom.filter((e) => !nearDivider(e) && (!e.ctrlKey || e.type === "wheel") && !e.button);
+  let draggingDivider = false;
+  canvas.addEventListener("pointerdown", (e) => {
+    if (!nearDivider(e)) return;
+    draggingDivider = true; canvas.setPointerCapture?.(e.pointerId); e.stopPropagation();
+    clearTimeout(lpTimer); lpTimer = null; downAt = null;
+  }, true);
+  canvas.addEventListener("pointermove", (e) => {
+    if (compare && !draggingDivider && e.pointerType === "mouse") canvas.style.cursor = nearDivider(e) ? "ew-resize" : (pickMode ? "crosshair" : "");
+    if (!draggingDivider) return;
+    compare.x = Math.max(0, Math.min(W, e.clientX)); draw();
+  });
+  window.addEventListener("pointerup", () => { if (draggingDivider) { draggingDivider = false; downAt = null; } });
+  $("openCompare").onclick = () => setCompare(!compare);
+  $("cmpClose").onclick = () => setCompare(false);
+  $("cmpSlider").addEventListener("input", (e) => { setCompareYear(+e.target.value); writeHash(); });
+  $("cmpSwap").onclick = () => { const a = year, b = compare.yearB; setYear(b, 1); setCompareYear(a); writeHash(); };
+
+  // =====================================================================
+  // 7a. Shareable links: year, view, selection and compare year in the hash
+  // =====================================================================
+  const slugify = (n) => n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const slugToName = new Map();
+  for (const n of spans.keys()) if (!n.startsWith("(")) slugToName.set(slugify(n).toLowerCase(), n);
+  const enc = (v, d) => { let t = Math.abs(v).toFixed(d); if (d) t = t.replace(/\.?0+$/, ""); return (v < 0 ? "m" : "") + t.replace(".", "p"); };
+  const dec = (t) => t == null ? null : (t[0] === "m" ? -1 : 1) * parseFloat(t.replace(/^m/, "").replace("p", "."));
+  function hashString() {
+    let h = "y" + enc(year, 0);
+    if (transform.k > 1.05) {
+      const ll = screenToLL(W / 2, viewCenterY());
+      if (ll) h += "x" + enc(ll[0], 2) + "l" + enc(ll[1], 2) + "z" + enc(transform.k * projection.scale() / REF_SCALE, 2);
+    }
+    if (compare) h += "c" + enc(compare.yearB, 0);
+    if (selected && !selected.rel) h += "s" + slugify(selected.name);
+    return h;
+  }
+  function parseHash(h) {
+    let m = /^#y(-?\d+)$/.exec(h);
+    if (m) return { y: +m[1] };
+    m = /^#y(m?\d+)(?:x(m?[\dp]+)l(m?[\dp]+)z([\dp]+))?(?:c(m?\d+))?(?:s([A-Za-z0-9-]+))?$/.exec(h);
+    if (!m) return null;
+    return { y: dec(m[1]), lon: dec(m[2]), lat: dec(m[3]), z: dec(m[4]), cmp: dec(m[5]), sel: m[6] || null };
+  }
+  function applyHash(st, animate) {
+    if (!st) return false;
+    if (st.cmp != null && !compare) setCompare(true, st.cmp); else if (st.cmp != null) setCompareYear(st.cmp);
+    setYear(st.y, 1);
+    if (st.sel) {
+      const name = slugToName.get(st.sel.toLowerCase());
+      const row = name && spans.get(name).rows.find(r => r.from <= year && year <= r.to);
+      selected = row ? ensure(row) : null; lastClickLL = null; renderInfo();
+    }
+    if (st.lon != null && st.lat != null && st.z) flyTo([st.lon, st.lat], st.z * REF_SCALE / projection.scale(), animate ? 800 : 0);
+    else if (st.sel && selected && !animate) zoomTo(selected);
+    draw();
+    return true;
+  }
+  let hashTimer = null;
+  function scheduleHash() { clearTimeout(hashTimer); hashTimer = setTimeout(() => { if (!quiz && !playing && !(tour && tour.animating)) writeHash(); }, 400); }
+  zoom.on("end.hash", scheduleHash);
+  function shareURL() { return "https://whoruled.earth/#" + hashString(); }
+  function toast(msg, ms = 2200) {
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(() => { if (!pickMode) t.classList.remove("show"); }, ms);
+  }
+  async function copyLink() {
+    const url = shareURL();
+    try { await navigator.clipboard.writeText(url); toast("Link copied: it opens this exact view"); track("share_link"); }
+    catch (e) { window.prompt ? toast(url, 6000) : toast(url, 6000); }
+  }
+  $("shareLink").onclick = copyLink;
+
+  // =====================================================================
+  // 7b. Record the play range as a video clip (with the year burned in)
+  // =====================================================================
+  let rec = null;
+  function canRecord() { return typeof MediaRecorder !== "undefined" && !!HTMLCanvasElement.prototype.captureStream; }
+  function startRecording() {
+    if (!canRecord()) { toast("This browser can't record video. Try Chrome, Edge, Firefox or a recent Safari.", 4000); return; }
+    stopTour(); setPick(false); pause(); hovered = null; $("tip").style.display = "none";
+    const rc = document.createElement("canvas");
+    const scale = Math.min(1, 1920 / canvas.width);
+    rc.width = Math.round(canvas.width * scale / 2) * 2; rc.height = Math.round(canvas.height * scale / 2) * 2;
+    const rctx = rc.getContext("2d");
+    const stream = rc.captureStream(30);
+    const type = ["video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm"].find(t => MediaRecorder.isTypeSupported(t)) || "";
+    let mr;
+    try { mr = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 8e6 } : { videoBitsPerSecond: 8e6 }); }
+    catch (e) { toast("Recording couldn't start in this browser.", 3500); return; }
+    const chunks = [];
+    mr.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    rec = { mr, rc, rctx, chunks, type: mr.mimeType || type, from: rangeFrom, to: rangeTo, raf: 0, started: performance.now() };
+    mr.onstop = finishRecording;
+    const disp = getComputedStyle(document.documentElement).getPropertyValue("--font-display");
+    const body = getComputedStyle(document.body).fontFamily;
+    const comp = () => {
+      if (!rec) return;
+      const { rctx: c, rc: r } = rec, u = r.height / 1080;
+      c.drawImage(canvas, 0, 0, r.width, r.height);
+      const [n, era] = fmt(year);
+      c.textBaseline = "alphabetic"; c.textAlign = "left";
+      c.fillStyle = "rgba(10,18,25,0.82)"; c.fillRect(40 * u, r.height - 190 * u, 440 * u, 150 * u);
+      c.fillStyle = C.brass; c.fillRect(40 * u, r.height - 190 * u, 6 * u, 150 * u);
+      c.fillStyle = C.ink; c.font = `650 ${96 * u}px ${disp}`; c.fillText(n, 70 * u, r.height - 82 * u);
+      const w = c.measureText(n).width;
+      c.fillStyle = C.brass; c.font = `600 ${34 * u}px ${body}`; c.fillText(era, 82 * u + w, r.height - 84 * u);
+      c.fillStyle = "rgba(233,228,216,0.7)"; c.font = `500 ${22 * u}px ${body}`;
+      c.fillText(compare ? `left side · right side ${fmtS(compare.yearB)}` : `${visible.filter(o => !o.rel).length} polities`, 72 * u, r.height - 52 * u);
+      c.textAlign = "right"; c.fillStyle = C.brass; c.font = `600 ${30 * u}px ${body}`;
+      c.fillText("whoruled.earth", r.width - 44 * u, r.height - 54 * u);
+      rec.raf = requestAnimationFrame(comp);
+    };
+    $("loop").checked = false;
+    setYear(rangeFrom, 1); draw();
+    $("recBtn").textContent = "■ Stop recording"; $("recBtn").classList.add("rec");
+    comp(); mr.start(250);
+    track("record_start");
+    rec.kick = setTimeout(() => { if (rec) play(); }, 700); // hold the first frame briefly
+    rec.cap = setTimeout(() => { if (rec) stopRecording(); }, 180000); // 3-minute safety cap
+  }
+  function stopRecording() {
+    if (!rec || rec.stopping) return;
+    rec.stopping = true; clearTimeout(rec.kick); clearTimeout(rec.cap);
+    if (playing) { playing = false; playBtn.textContent = "▶ Play"; $("miniPlay").textContent = "▶"; }
+    setTimeout(() => { if (rec && rec.mr.state !== "inactive") rec.mr.stop(); }, 900); // hold the last frame
+  }
+  function finishRecording() {
+    const r = rec; rec = null; cancelAnimationFrame(r.raf);
+    $("recBtn").textContent = "● Record clip"; $("recBtn").classList.remove("rec");
+    const mime = (r.type || "video/webm").split(";")[0];
+    const blob = new Blob(r.chunks, { type: mime });
+    if (!blob.size) { toast("Nothing was recorded. Please try again.", 3500); return; }
+    const ext = mime.includes("mp4") ? "mp4" : "webm";
+    const fileYear = (y) => y < 0 ? `${-y}BCE` : `${y}CE`;
+    const name = `whoruled-earth_${fileYear(r.from)}-${fileYear(year)}.${ext}`;
+    const url = URL.createObjectURL(blob);
+    const panel = $("clipPanel");
+    if (panel.dataset.url) URL.revokeObjectURL(panel.dataset.url);
+    panel.dataset.url = url;
+    $("clipVideo").src = url;
+    $("clipTitle").textContent = `${fmtS(r.from)} to ${fmtS(year)}`;
+    $("clipInfo").textContent = `${(blob.size / 1048576).toFixed(1)} MB · ${ext.toUpperCase()}${ext === "webm" ? " (plays in browsers, VLC and most apps)" : ""}`;
+    const dl = $("clipDownload"); dl.href = url; dl.download = name;
+    const file = new File([blob], name, { type: mime });
+    const shareBtn = $("clipShare");
+    shareBtn.hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
+    shareBtn.onclick = async () => { try { await navigator.share({ files: [file], title: "Who ruled Earth?", text: "https://whoruled.earth" }); } catch (e) {} };
+    panel.classList.add("show");
+    track("record_done", { seconds: Math.round((performance.now() - r.started) / 1000) });
+  }
+  $("recBtn").onclick = () => rec ? stopRecording() : startRecording();
+  $("clipClose").onclick = () => { $("clipPanel").classList.remove("show"); $("clipVideo").pause(); };
+
+  // ---------- shareable state in the hash ----------
+  function writeHash() { try { history.replaceState(null, "", "#" + hashString()); } catch (e) {} }
+  window.addEventListener("hashchange", () => applyHash(parseHash(location.hash), true));
 
   // ---------- modals & cookie note ----------
   document.addEventListener("click", (e) => {
@@ -1748,7 +2118,9 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   setRange(-800, 500);
   resize();
   window.addEventListener("resize", () => { resize(); computeVisible(); });
-  setYear(readHash() ?? 117, 1);
+  const startState = parseHash(location.hash);
+  setYear(startState ? startState.y : 117, 1);
+  if (startState) requestAnimationFrame(() => applyHash(startState, false));
   $("loading").remove();
 })();
 </script>

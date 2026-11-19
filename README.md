@@ -16,8 +16,11 @@ It's a static site with no build step: `index.html` plus two data files. Deploy 
 - **Who ruled here?** Right-click (or long-press, or use the button) on any spot to see every power that held it from 3400 BCE to today, as a timeline and a clickable list
 - **Daily quiz:** five rounds a day (one per era), same questions for everyone that day, with a streak counter and a shareable score grid. Results stay in the visitor's browser
 - **Guided tours:** captioned stories that move the map and the timeline (Rome, Alexander, the Mongols, the scramble for Africa, World War I)
+- **Rise and fall:** the details card graphs each polity's territory over its whole life (click the graph to jump), and **Largest empires** ranks the top 10 by area for the current year, updating live during playback
+- **Compare years:** a draggable divider shows one year on the left and another on the right, over the same view
+- **Share and record:** links keep the year, the view, the selected polity and the compare year (`#y1250x80p09l47p09z2p98sMongol-Empire`); **Record clip** turns the play range into an MP4 or WebM video with the year burned in, ready to download or share
 - **Rulers and events:** the details card loads a Wikipedia summary plus capital, rulers and key events from Wikidata, live in the visitor's browser, with the capital and numbered event pins on the map
-- Shareable year links: `#y117`, `#y-500`
+- Shareable links (old `#y117` / `#y-500` links still work)
 - Keyboard: Space plays or pauses, ←/→ steps one year, Shift+←/→ jumps to the previous or next change
 
 ## Files
