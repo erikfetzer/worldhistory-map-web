@@ -28,7 +28,7 @@
 <meta name="twitter:image" content="https://whoruled.earth/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Layout: full-bleed map; a timeline dock pinned to the bottom; info card floats top-left. Single dark "night atlas" theme by choice. */
 :root {
@@ -174,6 +174,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #infoMore .extract { line-height: 1.5; margin: 0 0 2px; }
 #infoMore .src { color: var(--muted); font-size: 11px; }
 #infoMore h4 { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.water-swatch { color: #8fb9d6; font-family: Fraunces, serif; font-style: italic; margin-right: 2px; }
 #infoMore .rnow { margin: 2px 0 6px; font-size: 13.5px; } #infoMore .rnow b { color: var(--brass); font-weight: 600; }
 #infoMore ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
 #infoMore .num { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--brass); color: #1b1408; font-size: 10px; font-weight: 700; }
@@ -618,6 +619,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     <label class="check"><input type="checkbox" id="showEvents" checked> Events</label>
     <div class="ev-types" id="evTypes" aria-label="Event types"></div>
     <label class="check"><input type="checkbox" id="showCities" checked> <span class="city-swatch" aria-hidden="true"></span>Cities</label>
+    <label class="check"><input type="checkbox" id="showWater" checked> <span class="water-swatch" aria-hidden="true">≈</span>Seas &amp; lakes</label>
     <label class="check"><input type="checkbox" id="showLands"> <span class="land-swatch" aria-hidden="true"></span>Native lands (US cessions)</label>
     <label class="check"><input type="checkbox" id="showModern"> <span class="dash-swatch" aria-hidden="true"></span>Today's borders</label>
   </div>
@@ -1128,6 +1130,72 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       if (openLand && openLand.kind === "reserve" && openLand.path) { ctx.strokeStyle = C.brass; ctx.lineWidth = 2.2 / k; ctx.stroke(openLand.path); }
     }
   }
+  // ---------- bodies of water ----------
+  // [name, lon, lat, zoom at which it appears, tier (0 ocean, 1 sea/gulf, 2 lake), angle in degrees]
+  const WATER = [
+    ["North Pacific Ocean", -155, 31, 0, 0], ["South Pacific Ocean", -125, -32, 0, 0], ["Pacific Ocean", 168, 8, 0, 0],
+    ["North Atlantic Ocean", -42, 33, 0, 0], ["South Atlantic Ocean", -16, -27, 0, 0], ["Indian Ocean", 78, -22, 0, 0],
+    ["Arctic Ocean", 60, 82, 0, 0], ["Southern Ocean", 20, -61, 0, 0],
+    ["Mediterranean Sea", 18, 34.3, 1.6, 1], ["Caribbean Sea", -75, 14.5, 1.6, 1], ["Gulf of Mexico", -90, 25, 1.6, 1],
+    ["Arabian Sea", 64, 14, 1.4, 1], ["Bay of Bengal", 88, 14, 1.6, 1], ["South China Sea", 114, 13, 1.6, 1],
+    ["Coral Sea", 156, -16, 1.8, 1], ["Tasman Sea", 161, -38, 1.8, 1], ["Philippine Sea", 133, 20, 1.8, 1],
+    ["Bering Sea", -178, 58, 1.8, 1], ["Gulf of Alaska", -145, 56, 2.4, 1], ["Hudson Bay", -85.5, 59.5, 1.8, 1],
+    ["Labrador Sea", -54, 58.5, 2.4, 1], ["Norwegian Sea", 2, 68, 2.2, 1], ["Sargasso Sea", -60, 29, 2.4, 1],
+    ["Barents Sea", 41, 73.5, 2, 1], ["Sea of Okhotsk", 150, 54.5, 2, 1], ["Gulf of Guinea", 3, 1.5, 2, 1],
+    ["Great Australian Bight", 131, -35.5, 2.4, 1], ["Weddell Sea", -45, -72, 2.4, 1], ["Ross Sea", -175, -75, 2.4, 1],
+    ["Black Sea", 34, 43.3, 2.4, 1], ["Caspian Sea", 50.6, 42, 2.4, 1, -80], ["Red Sea", 38.4, 20.8, 2.8, 1, 58],
+    ["Sea of Japan", 134.5, 40.5, 2.6, 1], ["East China Sea", 126, 29, 2.6, 1], ["Scotia Sea", -45, -57, 3, 1],
+    ["Kara Sea", 70, 75.5, 3, 1], ["Laptev Sea", 126, 76, 3, 1], ["East Siberian Sea", 165, 73, 3, 1],
+    ["Beaufort Sea", -140, 72, 3, 1], ["Greenland Sea", -6, 76, 3, 1], ["Baffin Bay", -66, 73, 3, 1],
+    ["North Sea", 3.5, 56, 3, 1], ["Baltic Sea", 19.3, 57, 3, 1], ["Persian Gulf", 51.2, 27, 3.2, 1, 30],
+    ["Andaman Sea", 96, 11, 3, 1], ["Java Sea", 111, -5, 3, 1], ["Banda Sea", 127, -5.5, 3, 1],
+    ["Timor Sea", 126, -11.5, 3, 1], ["Arafura Sea", 135.5, -9.3, 3, 1], ["Mozambique Channel", 41.5, -18.5, 3, 1, -60],
+    ["Yellow Sea", 123, 35.5, 3.4, 1], ["Celebes Sea", 122, 3.8, 3.6, 1], ["Sulu Sea", 120, 8.5, 3.8, 1],
+    ["Gulf of Carpentaria", 139.5, -14, 3.6, 1], ["Gulf of Aden", 48, 12.4, 3.6, 1, -12], ["Bay of Biscay", -4.5, 45.3, 3.6, 1],
+    ["Gulf of Thailand", 101.6, 9.5, 4, 1], ["Gulf of Oman", 58.6, 24.6, 4.5, 1, -30], ["Gulf of California", -110.6, 26.6, 4, 1, 50],
+    ["Gulf of St. Lawrence", -62, 48.3, 4, 1], ["Gulf of Bothnia", 20.6, 62.8, 4.5, 1, -70],
+    ["Adriatic Sea", 15.6, 43, 4, 1, 35], ["Aegean Sea", 25, 38.8, 4, 1], ["Tyrrhenian Sea", 11.6, 40, 4.5, 1], ["Ionian Sea", 18.8, 37.4, 4.5, 1],
+    ["English Channel", -2, 50.1, 5, 1, -12], ["Irish Sea", -4.9, 53.8, 5.5, 1], ["Sea of Azov", 36.6, 46.2, 6, 1], ["Sea of Marmara", 28, 40.75, 9, 1],
+    ["Lake Superior", -87.6, 47.6, 4, 2], ["Lake Michigan", -87, 43.8, 5, 2, -80], ["Lake Huron", -82.3, 44.8, 5, 2],
+    ["Lake Erie", -81.2, 42.2, 6, 2, -25], ["Lake Ontario", -77.8, 43.6, 6.5, 2], ["Lake Winnipeg", -97.6, 52.6, 5, 2, -70],
+    ["Great Bear Lake", -121, 66, 4, 2], ["Great Slave Lake", -114, 61.6, 4.5, 2], ["Lake Victoria", 33, -1, 3.6, 2],
+    ["Lake Tanganyika", 29.6, -6.2, 5, 2, 70], ["Lake Malawi", 34.6, -12, 5, 2, 80], ["Lake Chad", 14, 13, 5, 2],
+    ["Lake Baikal", 108, 53.4, 3.6, 2, -50], ["Aral Sea", 59.8, 45.2, 4, 2], ["Lake Balkhash", 75, 46.4, 4.8, 2, -12],
+    ["Lake Ladoga", 31.6, 61, 6, 2], ["Lake Titicaca", -69.4, -15.8, 7, 2], ["Lake Maracaibo", -71.6, 9.8, 7, 2],
+    ["Great Salt Lake", -112.5, 41.1, 8, 2], ["Dead Sea", 35.5, 31.5, 12, 2, -80], ["Sea of Galilee", 35.6, 32.8, 18, 2],
+  ];
+  let showWater = true;
+  function drawWater(boxes) {
+    if (!showWater || quiz) return;
+    const k = transform.k;
+    const base = [15, 11.5, 10], color = ["rgba(143,185,214,0.62)", "rgba(143,185,214,0.78)", "rgba(160,200,225,0.85)"];
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0.5px";
+    for (const [name, lon, lat, minK, tier, ang] of WATER) {
+      if (k < minK) continue;
+      const s = llToScreen([lon, lat]); if (!s) continue;
+      let [sx, sy] = s;
+      if (sx < -150 || sx > W + 150 || sy < -30 || sy > H + 30) continue;
+      const grow = Math.min(1.45, Math.sqrt(k / Math.max(minK, 1)));
+      const size = tier === 0 ? Math.min(19, base[0] * Math.min(1.3, Math.sqrt(k))) : base[tier] * grow;
+      ctx.font = `italic 400 ${size.toFixed(1)}px Fraunces, Georgia, serif`;
+      if ("letterSpacing" in ctx) ctx.letterSpacing = tier === 0 ? `${(size * 0.18).toFixed(1)}px` : "0.5px";
+      const w = ctx.measureText(name).width, h = size * 1.2, a = (ang || 0) * Math.PI / 180;
+      const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
+      if (tier === 0) { // keep ocean names whole on narrow screens
+        if (sx < 0 || sx > W) continue;
+        if (bw + 16 > W) continue;
+        sx = Math.max(bw / 2 + 8, Math.min(W - bw / 2 - 8, sx));
+      } else if (sx - bw / 2 < 0 || sx + bw / 2 > W) continue;
+      const b = [sx - bw / 2, sy - bh / 2, sx + bw / 2, sy + bh / 2];
+      if (boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]))) continue;
+      boxes.push(b);
+      ctx.save(); ctx.translate(sx, sy); if (a) ctx.rotate(a);
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.6)"; ctx.strokeText(name, 0, 0);
+      ctx.fillStyle = color[tier]; ctx.fillText(name, 0, 0);
+      ctx.restore();
+    }
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  }
   function drawLandLabels(y, k, boxes) {
     if (!lands || quiz) return;
     const family = getComputedStyle(document.body).fontFamily;
@@ -1289,6 +1357,8 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
     }
 
+    drawWater(boxes);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
     drawLandLabels(sceneYear, k, boxes);
     drawEvents(sceneYear, boxes, clip);
     drawCities(sceneYear, boxes, clip);
@@ -2680,6 +2750,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   phone.addEventListener?.("change", () => { setMenu(false); setSearchOpen(false); });
 
   $("showCities").addEventListener("change", (e) => { showCities = e.target.checked; draw(); });
+  $("showWater").addEventListener("change", (e) => { showWater = e.target.checked; draw(); });
 
   // ----- event card -----
   const evSummaryCache = new Map();
