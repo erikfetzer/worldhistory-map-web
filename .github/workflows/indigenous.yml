@@ -1,0 +1,42 @@
+name: Refresh Indigenous lands data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 10 3 */3 *"   # quarterly
+  push:
+    branches: [main]
+    paths:
+      - scripts/build-indigenous.py
+      - .github/workflows/indigenous.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: indigenous-lands
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Download and simplify
+        run: python3 scripts/build-indigenous.py
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add indigenous.json
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Refresh Indigenous lands data"
+          git pull --rebase origin main
+          git push origin HEAD:main
