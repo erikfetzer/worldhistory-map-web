@@ -762,7 +762,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     return o;
   }
 
-  let lakesGeo = null, lakesPath = null;
+  let lakesGeo = null, lakesPath = null, disputed = null, openDisputed = null, hoveredDisputed = null;
   function resize() {
     dpr = window.devicePixelRatio || 1;
     W = window.innerWidth; H = window.innerHeight;
@@ -782,6 +782,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     spherePath = new Path2D(); d3.geoPath(projection, spherePath)({ type: "Sphere" });
     landPath = new Path2D(); d3.geoPath(projection, landPath)(land);
     if (lakesGeo) { lakesPath = new Path2D(); d3.geoPath(projection, lakesPath)(lakesGeo); }
+    if (disputed) buildDisputed();
     gratPath = new Path2D(); d3.geoPath(projection, gratPath)(graticule);
     for (const o of feats) o.path = null;
     if (compare) { compare.x = Math.min(compare.x, W); compare.visibleB = listFor(compare.yearB); }
@@ -1190,6 +1191,58 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
   };
   const waterName = (name, y) => { for (const [a, b, n] of WATER_ERAS[name] || []) if (y >= a && y <= b) return n; return name; };
   let showWater = true;
+  // Disputed territories with no state in the border data (shown in the years given)
+  const DISPUTED_INFO = {
+    "Western Sahara": {
+      text: "Disputed since Spain withdrew in 1975–76. Morocco and Mauritania divided the territory; Mauritania gave up its claim in 1979. Morocco administers most of it and claims all of it. The Polisario Front's Sahrawi Arab Democratic Republic also claims it and holds the strip east of Morocco's sand wall. A UN ceasefire held from 1991 to 2020. The UN lists it as a non-self-governing territory.",
+      wiki: "https://en.wikipedia.org/wiki/Western_Sahara",
+    },
+  };
+  function buildDisputed() {
+    const gp = d3.geoPath(projection);
+    for (const d of disputed) {
+      d.path = new Path2D(); d3.geoPath(projection, d.path)(d.f);
+      d.bounds = gp.bounds(d.f); d.centroid = gp.centroid(d.f); d.area = gp.area(d.f);
+    }
+  }
+  fetch("disputed.json").then(r => r.json()).then(fc => {
+    disputed = fc.features.map(f => ({ f, name: f.properties.name, from: f.properties.from, to: f.properties.to, ll: d3.geoCentroid(f) }));
+    buildDisputed(); draw();
+  }).catch(() => {});
+  function disputedIn(y) { return disputed ? disputed.filter(d => y >= d.from && y <= d.to) : []; }
+  function disputedAt(cx, cy) {
+    const y = compare && cx > compare.x ? compare.yearB : year;
+    const bx = (cx - transform.x) / transform.k, by = (cy - transform.y) / transform.k;
+    return disputedIn(y).find(d => hitCtx.isPointInPath(d.path, bx, by)) || null;
+  }
+  function showDisputed(d) {
+    openDisputed = d; openLand = null; openEvent = null; selected = null; renderInfo();
+    const info = DISPUTED_INFO[d.name] || {};
+    cardData = { y: d.from, ll: d.ll, t: d.name };
+    $("evKicker").textContent = "Disputed territory";
+    $("evTitle").textContent = d.name;
+    $("evWhen").textContent = `${fmtS(d.from)} to today`;
+    $("evText").textContent = info.text || "";
+    $("evSrc").textContent = "No state is drawn here because the border data leaves contested land unassigned.";
+    $("evJump").textContent = `Go to ${d.from}`; $("evJump").hidden = false; $("evSpot").hidden = false;
+    const links = $("evLinks"); links.innerHTML = "";
+    if (info.wiki) { const a = document.createElement("a"); a.href = info.wiki; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Wikipedia ↗"; links.appendChild(a); }
+    $("evCard").classList.add("show");
+    track("disputed_open", { name: d.name });
+    draw();
+  }
+  function showUnclaimed(ll, y) {
+    openDisputed = null; openLand = null; openEvent = null; selected = null; renderInfo();
+    cardData = { y, ll, t: "this spot", spotLabel: "this spot" };
+    $("evKicker").textContent = "No state on record";
+    $("evTitle").textContent = `Unclaimed in ${fmtS(y)}`;
+    $("evWhen").textContent = "";
+    $("evText").textContent = "The border data shows no state here this year. The land may have been home to peoples outside any state's control, or the record has a gap.";
+    $("evSrc").textContent = "";
+    $("evJump").hidden = true; $("evSpot").hidden = false; $("evLinks").innerHTML = "";
+    $("evCard").classList.add("show");
+    draw();
+  }
   fetch("lakes.json").then(r => r.json()).then(t => {
     lakesGeo = topojson.feature(t, t.objects.lakes50);
     lakesPath = new Path2D(); d3.geoPath(projection, lakesPath)(lakesGeo); draw();
@@ -1346,6 +1399,14 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.fillStyle = "#1a3a52"; ctx.fill(lakesPath);
       ctx.strokeStyle = "rgba(143,185,214,0.35)"; ctx.lineWidth = 0.6 / k; ctx.stroke(lakesPath);
     }
+    for (const d of disputedIn(sceneYear)) {
+      if (!d.path) continue;
+      ctx.fillStyle = "rgba(205,190,160,0.16)"; ctx.fill(d.path);
+      ctx.setLineDash([4 / k, 3 / k]);
+      ctx.strokeStyle = d === openDisputed || d === hoveredDisputed ? C.brass : "rgba(233,228,216,0.55)";
+      ctx.lineWidth = (d === openDisputed ? 2.2 : 1.1) / k; ctx.stroke(d.path);
+      ctx.setLineDash([]);
+    }
     drawLandAreas(sceneYear, k, inView);
     const qt = quizTarget();
     if (qt && qt.path) {
@@ -1391,6 +1452,21 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       ctx.fillStyle = C.ink; ctx.fillText(o.label, sx, sy);
     }
 
+    if (!quiz) for (const d of disputedIn(sceneYear)) {
+      if (!d.centroid) continue;
+      const sx = d.centroid[0] * k + transform.x, sy = d.centroid[1] * k + transform.y;
+      const size = Math.min(14, (Math.sqrt(d.area) * k * 0.95) / (d.name.length * 0.56));
+      if (size < 8.5) continue;
+      ctx.font = `600 ${size.toFixed(1)}px ${getComputedStyle(document.body).fontFamily}`;
+      const w = ctx.measureText(d.name).width, h = size * 2.3;
+      const b = [sx - w / 2 - 2, sy - h / 2, sx + w / 2 + 2, sy + h / 2];
+      if (boxes.some(q => !(b[2] < q[0] || b[0] > q[2] || b[3] < q[1] || b[1] > q[3]))) continue;
+      boxes.push(b);
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,18,25,0.7)"; ctx.strokeText(d.name, sx, sy - size * 0.45);
+      ctx.fillStyle = "rgba(233,228,216,0.85)"; ctx.fillText(d.name, sx, sy - size * 0.45);
+      ctx.font = `italic 500 ${(size * 0.78).toFixed(1)}px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.strokeText("disputed", sx, sy + size * 0.6); ctx.fillStyle = "rgba(233,228,216,0.6)"; ctx.fillText("disputed", sx, sy + size * 0.6);
+    }
     drawWater(boxes, sceneYear);
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     drawLandLabels(sceneYear, k, boxes);
@@ -1637,8 +1713,14 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
     const lh = !pickMode && landAt(e.clientX, e.clientY);
     if (lh) { showLand(lh); return; }
     if (pickMode) { if (ll) openSpot(ll); return; }
+    const dh = disputedAt(e.clientX, e.clientY);
+    if (dh) { showDisputed(dh); return; }
     lastClickLL = ll;
     selected = hitAt(e.clientX, e.clientY);
+    if (!selected && ll && d3.geoContains(land, ll) && !(lakesGeo && d3.geoContains(lakesGeo, ll))) {
+      showUnclaimed(ll, compare && e.clientX > compare.x ? compare.yearB : year); return;
+    }
+    if (!selected && openDisputed) closeEvent();
     renderInfo(); draw();
   });
   canvas.addEventListener("contextmenu", (e) => {
@@ -1679,6 +1761,17 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       if (lh) {
         if (hovered) { hovered = null; draw(); }
         tip.textContent = lh.kind === "cession" ? `${lh.t} · ceded ${lh.y}` : lh.name;
+        tip.style.display = "block";
+        tip.style.left = Math.min(W - tip.offsetWidth - 8, lastMove.clientX + 14) + "px";
+        tip.style.top = (lastMove.clientY + 14) + "px";
+        canvas.style.cursor = "pointer";
+        return;
+      }
+      const dh = disputedAt(lastMove.clientX, lastMove.clientY);
+      if (dh !== hoveredDisputed) { hoveredDisputed = dh; draw(); }
+      if (dh) {
+        if (hovered) { hovered = null; draw(); }
+        tip.textContent = `${dh.name} · disputed`;
         tip.style.display = "block";
         tip.style.left = Math.min(W - tip.offsetWidth - 8, lastMove.clientX + 14) + "px";
         tip.style.top = (lastMove.clientY + 14) + "px";
@@ -2815,7 +2908,7 @@ body.quiz-mode .top, body.quiz-mode .dock, body.quiz-mode #info, body.quiz-mode 
       }, () => { evSummaryCache.delete(key); if (openEvent === e) $("evSrc").textContent = "Couldn't load a summary from Wikipedia."; });
     } else if (!e.d) $("evSrc").textContent = "";
   }
-  function closeEvent() { openEvent = null; openLand = null; cardData = null; $("evCard").classList.remove("show"); draw(); }
+  function closeEvent() { openEvent = null; openLand = null; openDisputed = null; cardData = null; $("evCard").classList.remove("show"); draw(); }
   $("evClose").onclick = closeEvent;
   $("evJump").onclick = () => { const e = cardData; if (!e) return; pause(); tourHold(); setYear(Math.max(MIN_Y, Math.min(MAX_Y, e.y)), 1); if (e.ll) flyTo(e.ll, Math.max(transform.k, 4)); writeHash(); };
   $("evSpot").onclick = () => { const e = cardData; if (!e || !e.ll) return; closeEvent(); openSpot(e.ll, e.spotLabel || e.t); };
