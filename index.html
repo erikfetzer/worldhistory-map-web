@@ -120,6 +120,9 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 #cookie h2 { font-family: var(--font-display); font-weight: 650; font-size: 17px; margin: 0 0 4px; text-wrap: balance; }
 #cookie p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
 #cookie .row { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+#cookie .cookie-x { position: absolute; top: 6px; right: 6px; border: none; background: none; color: var(--muted); font-size: 20px; line-height: 1; min-height: 0; padding: 4px 8px; }
+#cookie .cookie-x:hover { color: var(--ink); }
+#cookie h2 { padding-right: 22px; }
 #cookie .accept { background: var(--brass); color: #1b1408; border-color: var(--brass); font-weight: 600; }
 @keyframes wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(8deg); } }
 @media (prefers-reduced-motion: reduce) { #cookie svg { animation: none; } }
@@ -174,6 +177,7 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
 <div id="tip"></div>
 
 <aside id="cookie" role="region" aria-label="Cookie notice">
+  <button type="button" class="cookie-x" id="cookieX" aria-label="Close cookie notice">×</button>
   <svg viewBox="0 0 64 64" aria-hidden="true">
     <path d="M32 4a28 28 0 1 0 27.6 23.2 7 7 0 0 1-8.4-6.8 7 7 0 0 1-8.8-8.7A7 7 0 0 1 35.6 4.2 28.6 28.6 0 0 0 32 4Z" fill="#c98f4a" stroke="#0a1219" stroke-width="2"/>
     <circle cx="22" cy="24" r="3.6" fill="#3b2414"/><circle cx="36" cy="34" r="3" fill="#3b2414"/><circle cx="20" cy="42" r="3.4" fill="#3b2414"/><circle cx="44" cy="46" r="2.8" fill="#3b2414"/><circle cx="31" cy="50" r="2.2" fill="#3b2414"/>
@@ -739,10 +743,12 @@ dialog.modal::backdrop { background: rgba(5,9,13,0.66); backdrop-filter: blur(3p
   let seen = false;
   try { seen = localStorage.getItem("wre-cookie-ok") === "1"; } catch (e) {}
   if (!seen) setTimeout(() => cookie.classList.add("show"), 1200);
-  $("cookieOk").onclick = () => {
+  const closeCookie = () => {
     cookie.classList.remove("show");
     try { localStorage.setItem("wre-cookie-ok", "1"); } catch (e) {}
   };
+  $("cookieOk").onclick = closeCookie;
+  $("cookieX").onclick = closeCookie;
 
   // ---------- go ----------
   setRange(-800, 500);
