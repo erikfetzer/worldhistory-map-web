@@ -65,3 +65,7 @@ Cities come from **Reba, Reitsma & Seto (2016)**, "Spatializing 6,000 years of g
 The land outline and today's country borders are Natural Earth (public domain) via the `world-atlas` npm package.
 
 Cliopatria represents one scholarly reading of past territories. Historical borders were often fuzzy or disputed. Report data errors to the Seshat project.
+
+## License
+
+Code: MIT, see `LICENSE`. Data files keep their source licenses, listed in `LICENSE-DATA.md` (Cliopatria and the city datasets are CC BY 4.0, Natural Earth is public domain, Wikidata is CC0).
